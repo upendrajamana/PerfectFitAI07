@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transparency | Resume Analyzer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Background animation */
+    .animated-gradient {
+      background: linear-gradient(-45deg, #4f46e5, #0ea5e9, #3b82f6, #8b5cf6);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Glass effect */
+    .glass {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .dark-glass {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Advanced animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.3s; }
+    .reveal-delay-3 { transition-delay: 0.5s; }
+
+    /* Glow effect */
+    .glow {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+      animation: glow 3s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+      to { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+    }
+
+    /* Floating animation */
+    .float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Pulse animation */
+    .pulse-icon {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    /* Card hover effects */
+    .card {
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card:hover {
+      transform: translateY(-5px) scale(1.01);
+    }
+
+    .card:hover .card-icon {
+      transform: rotate(10deg) scale(1.1);
+    }
+
+    .card-icon {
+      transition: all 0.5s ease;
+    }
+
+    /* Button effects */
+    .btn-effect {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .btn-effect:hover {
+      transform: translateY(-3px);
+    }
+
+    .btn-effect:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .btn-effect:hover:before {
+      left: 100%;
+    }
+
+    /* List item animations */
+    .list-item {
+      transition: all 0.3s ease;
+      transform: translateX(0);
+    }
+
+    .list-item:hover {
+      transform: translateX(5px);
+    }
+
+    /* Particle background */
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      height: 3px;
+      background: linear-gradient(90deg, #4f46e5, #0ea5e9);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      width: 0%;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-gray-800 min-h-screen relative overflow-x-hidden">
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator" id="scrollIndicator"></div>
+
+  <!-- Particle background -->
+  <div id="particles-js"></div>
+
+  <!-- Main content -->
+  <div class="max-w-5xl mx-auto py-16 px-6 relative z-10">
+    <!-- Header with floating animation -->
+    <div class="text-center mb-16 reveal">
+      <div class="inline-block p-3 rounded-full bg-blue-500/20 backdrop-blur-sm mb-4 float">
+        <div class="text-5xl pulse-icon">🔍</div>
+      </div>
+      <h1 class="text-6xl font-extrabold text-white mb-4 tracking-tight">
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
+          Transparency
+        </span>
+      </h1>
+      <p class="text-blue-100 text-xl max-w-2xl mx-auto">
+        Understanding how we analyze and protect your resume data
+      </p>
+    </div>
+
+    <!-- Section 1: Resume Analysis Breakdown -->
+    <section class="glass rounded-3xl p-8 mb-10 card reveal reveal-delay-1 shadow-xl">
+      <div class="flex flex-col md:flex-row items-start gap-6">
+        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 card-icon flex items-center justify-center">
+          <i class="fas fa-chart-bar text-4xl text-white"></i>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold text-blue-800 mb-4 flex items-center">
+            Resume Analysis Breakdown
+            <div class="ml-3 h-1 w-10 bg-blue-500 rounded"></div>
+          </h2>
+          <p class="text-gray-700 mb-6 text-lg">
+            We analyze resumes based on multiple factors to help you improve and get noticed.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-blue-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex items-center mb-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-file-alt text-blue-600"></i>
+                </div>
+                <h3 class="font-semibold text-blue-800">Content Score</h3>
+              </div>
+              <p class="text-gray-600 pl-11">Relevance of experience, skills, and achievements</p>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex items-center mb-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-table-columns text-blue-600"></i>
+                </div>
+                <h3 class="font-semibold text-blue-800">Format Score</h3>
+              </div>
+              <p class="text-gray-600 pl-11">Layout clarity, font consistency, and structure</p>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex items-center mb-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-spell-check text-blue-600"></i>
+                </div>
+                <h3 class="font-semibold text-blue-800">Grammar Score</h3>
+              </div>
+              <p class="text-gray-600 pl-11">Checks for spelling, punctuation, and proper grammar</p>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex items-center mb-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                  <i class="fas fa-bullseye text-blue-600"></i>
+                </div>
+                <h3 class="font-semibold text-blue-800">ATS Match Score</h3>
+              </div>
+              <p class="text-gray-600 pl-11">Compares resume keywords with job description</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: AI Feedback Transparency -->
+    <section class="glass rounded-3xl p-8 mb-10 card reveal reveal-delay-2 shadow-xl">
+      <div class="flex flex-col md:flex-row items-start gap-6">
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 card-icon flex items-center justify-center">
+          <i class="fas fa-robot text-4xl text-white"></i>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold text-indigo-800 mb-4 flex items-center">
+            AI Feedback Transparency
+            <div class="ml-3 h-1 w-10 bg-indigo-500 rounded"></div>
+          </h2>
+          <p class="text-gray-700 mb-6 text-lg">
+            Feedback is provided clearly so you understand how to improve.
+          </p>
+
+          <div class="space-y-4">
+            <div class="bg-indigo-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4 flex-shrink-0">
+                  <i class="fas fa-star text-indigo-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-indigo-800 mb-1">Strengths & Improvements</h3>
+                  <p class="text-gray-600">Highlights what works well and what needs enhancement in your resume</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-indigo-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4 flex-shrink-0">
+                  <i class="fas fa-puzzle-piece text-indigo-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-indigo-800 mb-1">Missing Elements</h3>
+                  <p class="text-gray-600">Explains missing skills or information that could strengthen your profile</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-indigo-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4 flex-shrink-0">
+                  <i class="fas fa-lightbulb text-indigo-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-indigo-800 mb-1">Actionable Advice</h3>
+                  <p class="text-gray-600">Shows what caused score deductions with specific recommendations</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Data Usage Transparency -->
+    <section class="glass rounded-3xl p-8 card reveal reveal-delay-3 shadow-xl">
+      <div class="flex flex-col md:flex-row items-start gap-6">
+        <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-5 card-icon flex items-center justify-center">
+          <i class="fas fa-shield-alt text-4xl text-white"></i>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-3xl font-bold text-purple-800 mb-4 flex items-center">
+            Data Usage Transparency
+            <div class="ml-3 h-1 w-10 bg-purple-500 rounded"></div>
+          </h2>
+          <p class="text-gray-700 mb-6 text-lg">
+            We respect your privacy. Here's how we manage your data:
+          </p>
+
+          <div class="space-y-4">
+            <div class="bg-purple-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex">
+                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-4 flex-shrink-0">
+                  <i class="fas fa-trash-alt text-purple-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-purple-800 mb-1">No Data Stored</h3>
+                  <p class="text-gray-600">We don't save your resume after scoring - your data is deleted immediately</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-purple-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex">
+                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-4 flex-shrink-0">
+                  <i class="fas fa-robot text-purple-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-purple-800 mb-1">No Training Use</h3>
+                  <p class="text-gray-600">Your content is never used to train AI models or improve our systems</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-purple-50 rounded-xl p-5 hover:shadow-md transition-all duration-300 list-item">
+              <div class="flex">
+                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-4 flex-shrink-0">
+                  <i class="fas fa-lock text-purple-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-purple-800 mb-1">Secure Processing</h3>
+                  <p class="text-gray-600">All data is handled via encrypted communication channels</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Back Button -->
+    <div class="mt-16 text-center reveal reveal-delay-3">
+      <a href="/" class="btn-effect inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-full shadow-lg glow">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Back to Home
+      </a>
+    </div>
+  </div>
+
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+  <script>
+    // Reveal animations on scroll
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-mode");
+      }
+
+      // Reveal elements on scroll
+      const revealElements = document.querySelectorAll('.reveal');
+
+      function checkReveal() {
+        const windowHeight = window.innerHeight;
+        const revealPoint = 150;
+
+        revealElements.forEach(element => {
+          const revealTop = element.getBoundingClientRect().top;
+
+          if (revealTop < windowHeight - revealPoint) {
+            element.classList.add('active');
+          }
+        });
+      }
+
+      // Initial check
+      checkReveal();
+
+      // Check on scroll
+      window.addEventListener('scroll', checkReveal);
+
+      // Scroll indicator
+      const scrollIndicator = document.getElementById('scrollIndicator');
+
+      window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        scrollIndicator.style.width = scrolled + "%";
+      });
+
+      // Initialize particles.js
+      particlesJS("particles-js", {
+        "particles": {
+          "number": {
+            "value": 80,
+            "density": {
+              "enable": true,
+              "value_area": 800
+            }
+          },
+          "color": {
+            "value": "#ffffff"
+          },
+          "shape": {
+            "type": "circle",
+            "stroke": {
+              "width": 0,
+              "color": "#000000"
+            },
+          },
+          "opacity": {
+            "value": 0.3,
+            "random": true,
+            "anim": {
+              "enable": true,
+              "speed": 1,
+              "opacity_min": 0.1,
+              "sync": false
+            }
+          },
+          "size": {
+            "value": 3,
+            "random": true,
+            "anim": {
+              "enable": true,
+              "speed": 2,
+              "size_min": 0.1,
+              "sync": false
+            }
+          },
+          "line_linked": {
+            "enable": true,
+            "distance": 150,
+            "color": "#ffffff",
+            "opacity": 0.2,
+            "width": 1
+          },
+          "move": {
+            "enable": true,
+            "speed": 1,
+            "direction": "none",
+            "random": true,
+            "straight": false,
+            "out_mode": "out",
+            "bounce": false,
+          }
+        },
+        "interactivity": {
+          "detect_on": "canvas",
+          "events": {
+            "onhover": {
+              "enable": true,
+              "mode": "grab"
+            },
+            "onclick": {
+              "enable": true,
+              "mode": "push"
+            },
+            "resize": true
+          },
+          "modes": {
+            "grab": {
+              "distance": 140,
+              "line_linked": {
+                "opacity": 0.5
+              }
+            },
+            "push": {
+              "particles_nb": 3
+            }
+          }
+        },
+        "retina_detect": true
+      });
+    });
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96288de5935221dd',t:'MTc1MzA3ODQyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

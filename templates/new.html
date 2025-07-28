@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Scoring Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0b0f;
+            --bg-secondary: #151820;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-soft: #3b82f6;
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-hover: rgba(255, 255, 255, 0.04);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.15);
+            --glow-purple: 0 0 20px rgba(139, 92, 246, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.02) 0%, transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.02) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .left, .right {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .score-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow:
+                var(--shadow-lg),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-card:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                var(--shadow-lg),
+                var(--glow-cyan),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border-color: rgba(6, 182, 212, 0.1);
+        }
+
+        .score-card h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+
+        .score-main {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                var(--shadow-sm),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .score-main:hover {
+            background: var(--glass-hover);
+            box-shadow:
+                var(--shadow-sm),
+                var(--glow-cyan),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        #score-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            display: block;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .out-of {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .score-container {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: 1fr;
+        }
+
+        .score-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--glass-border);
+            box-shadow:
+                var(--shadow-sm),
+                inset 0 1px 0 rgba(255, 255, 255, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-section:hover {
+            transform: translateY(-2px);
+            background: var(--glass-hover);
+            box-shadow:
+                var(--shadow-lg),
+                var(--glow-cyan),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            border-color: rgba(6, 182, 212, 0.1);
+        }
+
+        .score-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .score-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            border: 1px solid var(--glass-border);
+        }
+
+        .score-icon.tailoring {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(6, 182, 212, 0.05));
+            color: var(--accent-cyan);
+        }
+
+        .score-icon.content {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+            color: var(--accent-purple);
+        }
+
+        .score-icon.order {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+            color: var(--accent-soft);
+        }
+
+        .score-icon.presence {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+            color: var(--accent-purple);
+        }
+
+        .score-section:hover .score-icon {
+            transform: scale(1.05);
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        .score-info {
+            flex: 1;
+        }
+
+        .score-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .score-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 0.75rem;
+            line-height: 1;
+        }
+
+        .progress-container {
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill.tailoring {
+            background: linear-gradient(90deg, var(--accent-cyan), rgba(6, 182, 212, 0.8));
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+        }
+
+        .progress-fill.content {
+            background: linear-gradient(90deg, var(--accent-purple), rgba(139, 92, 246, 0.8));
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .progress-fill.order {
+            background: linear-gradient(90deg, var(--accent-soft), rgba(59, 130, 246, 0.8));
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .progress-fill.presence {
+            background: linear-gradient(90deg, var(--accent-purple), rgba(139, 92, 246, 0.8));
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .score-feedback {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .options-list {
+            background: var(--glass-hover);
+            backdrop-filter: blur(15px);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+
+        .options-list.expanded {
+            max-height: 200px;
+            padding: 0.75rem;
+            border-color: var(--glass-border);
+        }
+
+        .options-list div {
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: color 0.2s ease;
+        }
+
+        .options-list div:hover {
+            color: var(--accent-cyan);
+        }
+
+        .options-list div:last-child {
+            border-bottom: none;
+        }
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.75rem 0;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .home-btn:hover {
+            color: var(--accent-soft);
+            text-shadow: 0 0 8px currentColor;
+        };
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: color 0.3s ease;
+        }
+
+        .options-list div:hover {
+            color: var(--neon-cyan);
+        }
+
+        .options-list div:last-child {
+            border-bottom: none;
+        }
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            font-family: 'Orbitron', monospace;
+            font-weight: 500;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .home-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+            transition: width 0.3s ease;
+        }
+
+        .home-btn:hover {
+            color: var(--neon-green);
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .home-btn:hover::before {
+            width: 100%;
+        }
+
+        .tailored-insights-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow:
+                var(--shadow-lg),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tailored-insights-box:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                var(--shadow-lg),
+                var(--glow-purple),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border-color: rgba(139, 92, 246, 0.1);
+        }
+
+        .tailored-insights-box h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .tailored-insights-box p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .description-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .description-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .description-input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow:
+                inset 0 2px 4px rgba(0, 0, 0, 0.2),
+                0 0 0 2px rgba(139, 92, 246, 0.1),
+                var(--glow-purple);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-soft));
+            color: var(--text-primary);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                var(--shadow-sm),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .analyze-btn:hover {
+            background: linear-gradient(135deg, var(--accent-soft), var(--accent-cyan));
+            transform: translateY(-1px);
+            box-shadow:
+                var(--shadow-lg),
+                var(--glow-purple),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
+
+        .feedback-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            white-space: pre-line;
+            color: var(--text-primary);
+            line-height: 1.7;
+            box-shadow:
+                var(--shadow-lg),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+            margin: 1.5rem 0;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 1rem;
+            }
+
+            .score-card, .tailored-insights-box {
+                padding: 1.5rem;
+            }
+
+            .score-main {
+                padding: 1.5rem;
+            }
+
+            #score-count {
+                font-size: 2.5rem;
+            }
+
+            .score-section {
+                padding: 1.25rem;
+            }
+
+            .score-header {
+                gap: 0.75rem;
+            }
+
+            .score-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .score-value {
+                font-size: 1.5rem;
+            }
+
+            .options-list.expanded {
+                padding: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .score-card, .tailored-insights-box {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .tailored-insights-box h2, .score-card h2 {
+                font-size: 1.25rem;
+            }
+
+            #score-count {
+                font-size: 2rem;
+            }
+
+            .score-section {
+                padding: 1rem;
+            }
+
+            .score-header {
+                gap: 0.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .score-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.875rem;
+            }
+
+            .score-title {
+                font-size: 0.9rem;
+            }
+
+            .score-value {
+                font-size: 1.25rem;
+            }
+
+            .score-feedback {
+                font-size: 0.8rem;
+            }
+
+            .analyze-btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left section: Score -->
+        <div class="left">
+            <div class="score-card">
+                <h2>Your Total Score</h2>
+                <div class="score-main">
+                    <span id="score-count">0</span><span class="out-of">/100</span>
+                </div>
+
+                <div class="score-container">
+                    <div class="score-section" onclick="toggleOptions(this)">
+                        <div class="score-header">
+                            <div class="score-icon tailoring">T</div>
+                            <div class="score-info">
+                                <div class="score-title">Tailoring</div>
+                                <div class="score-value"><span id="match-score">0</span>/100</div>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill tailoring" id="match-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-feedback" id="match-feedback">Excellent keyword alignment with job requirements</div>
+                        <div class="options-list">
+                            <div>Job Fit</div>
+                            <div>Relevance</div>
+                        </div>
+                    </div>
+
+                    <div class="score-section" onclick="toggleOptions(this)">
+                        <div class="score-header">
+                            <div class="score-icon content">C</div>
+                            <div class="score-info">
+                                <div class="score-title">Content Quality</div>
+                                <div class="score-value"><span id="analysis-score">0</span>/100</div>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill content" id="analysis-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-feedback" id="analysis-feedback">Strong technical skills presentation with clear achievements</div>
+                        <div class="options-list">
+                            <div>Skills Summary</div>
+                            <div>Strengths/Gaps</div>
+                        </div>
+                    </div>
+
+                    <div class="score-section" onclick="toggleOptions(this)">
+                        <div class="score-header">
+                            <div class="score-icon order">O</div>
+                            <div class="score-info">
+                                <div class="score-title">Section Order</div>
+                                <div class="score-value"><span id="order-score">0</span>/100</div>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill order" id="order-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-feedback" id="order-feedback">Optimal flow with experience prioritized effectively</div>
+                        <div class="options-list">
+                            <div>Ideal Flow</div>
+                            <div>Key Sections</div>
+                        </div>
+                    </div>
+
+                    <div class="score-section" onclick="toggleOptions(this)">
+                        <div class="score-header">
+                            <div class="score-icon presence">P</div>
+                            <div class="score-info">
+                                <div class="score-title">Section Presence</div>
+                                <div class="score-value"><span id="presence-score">0</span>/100</div>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill presence" id="presence-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-feedback" id="presence-feedback">All essential sections included with comprehensive coverage</div>
+                        <div class="options-list">
+                            <div>Important Sections</div>
+                            <div>Completeness</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+                <a href="/" class="home-btn">← Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Right section: AI Feedback -->
+        <div class="right">
+            <div class="tailored-insights-box">
+                <h2>Get Tailored Insights</h2>
+                <p>Paste the job description below to receive a personalized analysis of how well your resume is tailored.</p>
+                <textarea id="descriptionInput" placeholder="Paste job description here..." class="description-input"></textarea>
+                <button class="analyze-btn" onclick="submitDescription()">Analyze</button>
+            </div>
+            <div class="feedback-container">
+                {{ analysis }}
+            </div>
+        </div>
+    </div>
+
+   <script>
+    function toggleOptions(element) {
+        const optionsList = element.nextElementSibling;
+        const isExpanded = optionsList.classList.contains('expanded');
+
+        document.querySelectorAll('.options-list.expanded').forEach(list => {
+            if (list !== optionsList) {
+                list.classList.remove('expanded');
+            }
+        });
+
+        if (isExpanded) {
+            optionsList.classList.remove('expanded');
+        } else {
+            optionsList.classList.add('expanded');
+        }
+    }
+
+    function submitDescription() {
+        const description = document.getElementById('descriptionInput').value;
+        if (description.trim()) {
+            console.log('Analyzing job description:', description);
+
+            const btn = document.querySelector('.analyze-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Analyzing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 2000);
+        } else {
+            alert('Please paste a job description first.');
+        }
+    }
+
+    function updateScores() {
+        const scores = {
+            'match-score': {{ match_score|int }},
+            'analysis-score': {{ analysis_score|int }},
+            'order-score': {{ (resume_order*10)|int }},
+            'presence-score': {{ presence_score|int }}
+        };
+
+        const feedbacks = {
+            'match-feedback': [
+                'Great keyword alignment with the job description.',
+                'Decent match; optimize keywords for better results.',
+                'Needs improvement in JD relevance.'
+            ],
+            'analysis-feedback': [
+                'Clear achievements and quantified results.',
+                'Technical skills are well-presented.',
+                'Good structure, try to make it more concise.'
+            ],
+            'order-feedback': [
+                'Excellent flow of sections.',
+                'Order is logical but can be improved.',
+                'Consider rearranging for clarity.'
+            ],
+            'presence-feedback': [
+                'All essential sections included.',
+                'Some key sections are missing.',
+                'Make sure to include Contact, Skills, and Experience.'
+            ]
+        };
+
+        let total = 0;
+        for (const id in scores) {
+            const score = scores[id];
+            total += score;
+
+            // Update score number
+            const scoreElement = document.getElementById(id);
+            if (scoreElement) scoreElement.textContent = score + '%';
+
+            // Update progress bar
+            const progressId = id.replace('-score', '-progress');
+            const progressBar = document.getElementById(progressId);
+            if (progressBar) progressBar.style.width = score + '%';
+
+            // Update feedback
+            const feedbackId = id.replace('-score', '-feedback');
+            const feedbackElement = document.getElementById(feedbackId);
+            if (feedbackElement && feedbacks[feedbackId]) {
+                const randomFeedback = feedbacks[feedbackId][Math.floor(Math.random() * feedbacks[feedbackId].length)];
+                feedbackElement.textContent = randomFeedback;
+            }
+        }
+
+        // Set total score (from backend)
+        document.getElementById('score-count').textContent = {{ total_score|int }};
+    }
+
+    document.addEventListener('DOMContentLoaded', updateScores);
+</script>
+
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9630d58b56713585',t:'MTc1MzE2NTI0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

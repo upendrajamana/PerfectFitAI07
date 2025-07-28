@@ -1,0 +1,44 @@
+Job Title: Data Scientist
+Location: [City, Country or Remote]
+Job Type: [Full-Time / Part-Time / Contract]
+Experience Level: [Entry-Level / Mid-Level / Senior-Level]
+
+Job Summary:
+We are seeking a highly skilled and motivated Data Scientist to join our analytics team. You will be responsible for collecting, analyzing, and interpreting large datasets to help drive strategic decisions, improve business outcomes, and develop innovative data-driven solutions. Ideal candidates are analytical, detail-oriented, and comfortable working in cross-functional teams.
+
+Key Responsibilities:
+Work with large, complex datasets to solve real-world problems using machine learning, statistical modeling, and data analysis.
+
+Develop predictive models and algorithms that support business goals.
+
+Collect, clean, and preprocess structured and unstructured data from various sources.
+
+Communicate insights and recommendations to stakeholders via reports, dashboards, and presentations.
+
+Collaborate with data engineers, analysts, and business teams to understand requirements and deliver actionable solutions.
+
+Design A/B experiments and conduct deep-dive analyses to evaluate product or campaign performance.
+
+Continuously improve models and processes by incorporating new data sources and techniques.
+
+Qualifications:
+Bachelor’s or Master’s degree in Computer Science, Data Science, Statistics, Mathematics, or a related field. PhD is a plus.
+
+Proficiency in programming languages such as Python or R.
+
+Strong understanding of machine learning algorithms and statistical techniques.
+
+Experience with data manipulation tools (e.g., SQL, Pandas) and data visualization tools (e.g., Tableau, Power BI, Matplotlib).
+
+Familiarity with big data technologies (e.g., Spark, Hadoop) is a plus.
+
+Strong problem-solving skills and attention to detail.
+
+Excellent communication and collaboration abilities.
+
+Preferred Skills:
+Experience working with cloud platforms (AWS, GCP, Azure).
+
+Knowledge of NLP, computer vision, or time-series analysis.
+
+Background in deploying ML models in production environments (using tools like MLflow, Docker, or Kubernetes).

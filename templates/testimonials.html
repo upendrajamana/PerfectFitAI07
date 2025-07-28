@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Testimonials - OptiCV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0a0a12;
+      --text-color: #f8f9fc;
+      --secondary-color: #a0a8c0;
+      --card-bg: #16161e;
+      --content-bg: #12121a;
+      --accent-color: #805cf2;
+      --accent-light: #9b7ff8;
+      --accent-dark: #4f3cc9;
+      --secondary-accent: #e2c496;
+      --border-radius: 12px;
+      --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      --hover-color: linear-gradient(135deg, #4f3cc9, #7b5aff);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --card-border: rgba(255, 255, 255, 0.05);
+    }
+
+    .light-mode {
+      --bg-color: #f8f9fc;
+      --text-color: #1a1a2e;
+      --secondary-color: #5a6482;
+      --card-bg: #ffffff;
+      --content-bg: #f0f2f9;
+      --accent-color: #4f3cc9;
+      --accent-light: #6b4de0;
+      --accent-dark: #3b2a9c;
+      --secondary-accent: #d5a76c;
+      --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --hover-color: linear-gradient(135deg, #e8e4ff, #d0cfff);
+      --card-border: rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+    overflow-x: hidden;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: var(--transition);
+      line-height: 1.6;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(90, 92, 242, 0.05) 0%, rgba(0, 0, 0, 0) 80%),
+        radial-gradient(circle at 90% 80%, rgba(226, 196, 150, 0.05) 0%, rgba(0, 0, 0, 0) 80%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    .light-mode body {
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(90, 92, 242, 0.03) 0%, rgba(0, 0, 0, 0) 80%),
+        radial-gradient(circle at 90% 80%, rgba(226, 196, 150, 0.03) 0%, rgba(0, 0, 0, 0) 80%);
+    }
+
+    .custom-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 5%;
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border);
+      transition: var(--transition);
+    }
+
+    .logo {
+      color: var(--text-color);
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      margin: 0;
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 30%;
+      height: 3px;
+      background: linear-gradient(135deg, var(--secondary-accent), #f0d4a8);
+      border-radius: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav-btn {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .nav-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--hover-color);
+      z-index: -1;
+      opacity: 0;
+      transition: var(--transition);
+      transform: translateY(100%);
+      border-radius: var(--border-radius);
+    }
+
+    .nav-btn:hover::before {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .toggle-theme {
+      background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(128, 92, 242, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 20px;
+    }
+
+    .toggle-theme:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(128, 92, 242, 0.4);
+    }
+
+    .toggle-theme svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    .testimonial-section {
+      padding: 60px 40px;
+      text-align: center;
+      background-color: var(--content-bg);
+      border-radius: var(--border-radius);
+      max-width: 1000px;
+      margin: 40px auto;
+      transition: var(--transition);
+      box-shadow: var(--box-shadow);
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .testimonial-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, var(--accent-color), var(--secondary-accent));
+    }
+
+    .testimonial-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 50px;
+      background: linear-gradient(135deg, var(--text-color), var(--accent-light));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      position: relative;
+      display: inline-block;
+    }
+
+    .testimonial-section h2::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--secondary-accent);
+      border-radius: 2px;
+    }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .testimonial-card {
+      background-color: var(--card-bg);
+      padding: 35px 30px;
+      border-radius: var(--border-radius);
+      color: var(--secondary-color);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+      border: 1px solid var(--card-border);
+      position: relative;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(128, 92, 242, 0.15);
+    }
+
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-family: 'Playfair Display', serif;
+      font-size: 80px;
+      line-height: 0;
+      color: var(--accent-color);
+      opacity: 0.15;
+    }
+
+    .testimonial-content {
+      position: relative;
+      z-index: 1;
+      flex-grow: 1;
+    }
+
+    .testimonial-card p {
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 25px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      margin-top: auto;
+      border-top: 1px solid var(--card-border);
+      padding-top: 20px;
+    }
+
+    .author-image {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 15px;
+      border: 2px solid var(--accent-color);
+    }
+
+    .author-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .author-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .author-name {
+      color: var(--text-color);
+      font-weight: 600;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .author-title {
+      color: var(--accent-light);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .rating {
+      display: flex;
+      margin-bottom: 15px;
+      color: var(--secondary-accent);
+    }
+
+    .rating svg {
+      width: 18px;
+      height: 18px;
+      margin-right: 2px;
+    }
+
+    .testimonial-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+
+    .section-intro {
+      max-width: 700px;
+      margin: 0 auto 50px;
+      color: var(--secondary-color);
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    .cta-container {
+      margin-top: 60px;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+      color: white;
+      font-weight: 600;
+      padding: 14px 30px;
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(128, 92, 242, 0.3);
+    }
+
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(128, 92, 242, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .custom-header {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px 5%;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .testimonial-section {
+        padding: 40px 20px;
+      }
+
+      .testimonial-section h2 {
+        font-size: 32px;
+      }
+
+      .testimonial-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .toggle-theme {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="custom-header">
+    <h1 class="logo">PerfectFitAI</h1>
+  </header>
+
+  <div class="page-container">
+    <section class="testimonial-section">
+      <h2>What Users Say</h2>
+      <p class="section-intro">
+        Discover how PerfectFitAI has helped professionals across various industries improve their resumes and advance their careers.
+      </p>
+
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-badge">Featured</div>
+          <div class="testimonial-content">
+            <div class="rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
+            <p>"PerfectFitAI helped me improve my resume score by 30%! The AI-powered suggestions were incredibly insightful and targeted exactly what I needed to enhance. Within weeks of implementing the changes, I received multiple interview calls."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-image">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--secondary-color)" width="100%" height="100%">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+              </svg>
+            </div>
+            <div class="author-info">
+              <p class="author-name">Priya S.</p>
+              <p class="author-title">Data Scientist</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <div class="rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
+            <p>"The feature suggestions were so personalized to my target role. After implementing PerfectFitAI's recommendations, I landed 2 interviews within a week! The skill gap analysis was particularly helpful in identifying what I needed to highlight."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-image">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--secondary-color)" width="100%" height="100%">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+              </svg>
+            </div>
+            <div class="author-info">
+              <p class="author-name">Arjun M.</p>
+              <p class="author-title">Android Developer</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <div class="rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" opacity="0.3">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
+            <p>"Simple, smart, and accurate. PerfectFitAI helped me understand exactly what recruiters are looking for in my industry. The ATS optimization tips were game-changing for getting past automated screening systems. Highly recommend!"</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-image">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--secondary-color)" width="100%" height="100%">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+              </svg>
+            </div>
+            <div class="author-info">
+              <p class="author-name">Sneha R.</p>
+              <p class="author-title">Product Manager</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-container">
+        <a href="/" class="cta-button">Try PerfectFitAI Today</a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    }
+
+    window.onload = () => {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light') {
+        document.body.classList.add('light-mode');
+      }
+    };
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96248898e245f647',t:'MTc1MzAzNjI2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

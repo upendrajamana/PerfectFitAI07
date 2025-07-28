@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder - Professional Resume Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Base */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* Neon Effects */
+        .neon-border {
+            border: 1px solid rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .neon-text {
+            color: #60a5fa;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+        }
+
+        /* Input Styling */
+        .cyber-input {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            backdrop-filter: blur(8px);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-input:focus {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 0 15px rgba(59, 130, 246, 0.3);
+            outline: none;
+        }
+
+        .cyber-input::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Button Styles */
+        .cyber-btn-primary {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8));
+            border: 1px solid rgba(59, 130, 246, 0.6);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            border-color: rgba(59, 130, 246, 0.8);
+        }
+
+        .cyber-btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            backdrop-filter: blur(8px);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-btn-secondary:hover {
+            background: rgba(51, 65, 85, 0.9);
+            border-color: rgba(148, 163, 184, 0.6);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4);
+        }
+
+        /* Navigation */
+        .nav-btn {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            backdrop-filter: blur(8px);
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-btn-active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(147, 51, 234, 0.3));
+            border-color: rgba(59, 130, 246, 0.6);
+            color: #60a5fa;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Resume Preview */
+        .resume-preview {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        /* Template Layouts */
+        .template-modern {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .template-classic {
+            font-family: 'Times New Roman', serif;
+        }
+
+        .template-creative {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .template-minimal {
+            font-family: 'Helvetica', sans-serif;
+        }
+
+        /* Header Variations */
+        .header-modern {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header-classic {
+            border-bottom: 3px solid #1e293b;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+
+        .header-creative {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-minimal {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+
+        /* Section Styling Variations */
+        .section-modern h2 {
+            color: #1e293b;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section-classic h2 {
+            color: #1e293b;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .section-creative h2 {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .section-minimal h2 {
+            color: #374151;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Layout Grid Variations */
+        .layout-modern { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        .layout-classic { display: block; }
+        .layout-creative { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+        .layout-minimal { display: block; }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1280px) {
+            .layout-creative { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+    <!-- Header -->
+    <header class="glass-card border-b border-blue-500/30">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold neon-text">Resume Builder</h1>
+                        <p class="text-slate-400" id="templateName">Create your professional resume</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="saveResume()" class="cyber-btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                        💾 Save Draft
+                    </button>
+                    <button onclick="downloadPDF()" class="cyber-btn-primary px-6 py-3 rounded-xl text-sm font-medium text-white">
+                        📁 Download PDF
+                    </button>
+                    <button onclick="goBack()" class="cyber-btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                        ← Back to Templates
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-full mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+            <!-- Navigation Sidebar -->
+            <div class="xl:col-span-2">
+                <div class="glass-sidebar rounded-2xl p-6 xl:sticky xl:top-8">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold neon-text mb-3">Section Order</h3>
+                        <div class="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-2"></div>
+                        <p class="text-xs text-slate-400">Use arrows to reorder sections</p>
+                    </div>
+                    <div class="space-y-3" id="sectionNavigation">
+                        <div class="flex items-center space-x-2" data-section="personal">
+                            <div class="flex flex-col space-y-1">
+                                <button onclick="moveSectionUp('personal')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="moveSectionDown('personal')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button onclick="showSection('personal')" id="nav-personal" class="nav-btn nav-btn-active flex-1 flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200">
+                                <span class="text-xl">👤</span>
+                                <span class="font-medium text-sm">Personal</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2" data-section="work">
+                            <div class="flex flex-col space-y-1">
+                                <button onclick="moveSectionUp('work')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="moveSectionDown('work')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button onclick="showSection('work')" id="nav-work" class="nav-btn flex-1 flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200">
+                                <span class="text-xl">💼</span>
+                                <span class="font-medium text-sm">Work</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2" data-section="education">
+                            <div class="flex flex-col space-y-1">
+                                <button onclick="moveSectionUp('education')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="moveSectionDown('education')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button onclick="showSection('education')" id="nav-education" class="nav-btn flex-1 flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200">
+                                <span class="text-xl">🎓</span>
+                                <span class="font-medium text-sm">Education</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2" data-section="projects">
+                            <div class="flex flex-col space-y-1">
+                                <button onclick="moveSectionUp('projects')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="moveSectionDown('projects')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button onclick="showSection('projects')" id="nav-projects" class="nav-btn flex-1 flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200">
+                                <span class="text-xl">💡</span>
+                                <span class="font-medium text-sm">Projects</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2" data-section="skills">
+                            <div class="flex flex-col space-y-1">
+                                <button onclick="moveSectionUp('skills')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="moveSectionDown('skills')" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded transition-all duration-200">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button onclick="showSection('skills')" id="nav-skills" class="nav-btn flex-1 flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200">
+                                <span class="text-xl">🛠️</span>
+                                <span class="font-medium text-sm">Skills</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="xl:col-span-4">
+                <div class="space-y-6">
+                    <!-- Personal Details Section -->
+                    <div id="section-personal" class="section-content glass-card rounded-2xl p-6 fade-in">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <span class="text-2xl">👤</span>
+                            <h2 class="text-xl font-semibold neon-text">Personal Details</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="name" class="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+                                <input type="text" id="name" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="John Doe">
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                                <input type="email" id="email" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="john@example.com">
+                            </div>
+
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-slate-300 mb-2">Phone Number</label>
+                                <input type="tel" id="phone" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="+1 (555) 123-4567">
+                            </div>
+
+                            <div>
+                                <label for="location" class="block text-sm font-medium text-slate-300 mb-2">Location</label>
+                                <input type="text" id="location" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="New York, NY">
+                            </div>
+
+                            <div>
+                                <label for="website1" class="block text-sm font-medium text-slate-300 mb-2">Website/Portfolio</label>
+                                <input type="url" id="website1" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="https://johndoe.com">
+                            </div>
+
+                            <div>
+                                <label for="website2" class="block text-sm font-medium text-slate-300 mb-2">LinkedIn/GitHub</label>
+                                <input type="url" id="website2" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="https://linkedin.com/in/johndoe">
+                            </div>
+
+                            <div>
+                                <label for="leetcode" class="block text-sm font-medium text-slate-300 mb-2">LeetCode Profile</label>
+                                <input type="url" id="leetcode" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="https://leetcode.com/username">
+                            </div>
+
+                            <div>
+                                <label for="geeksforgeeks" class="block text-sm font-medium text-slate-300 mb-2">GeeksforGeeks Profile</label>
+                                <input type="url" id="geeksforgeeks" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="https://auth.geeksforgeeks.org/user/username">
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="summary" class="block text-sm font-medium text-slate-300 mb-2">Professional Summary</label>
+                                <textarea id="summary" rows="4" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200 resize-none" placeholder="Brief professional summary highlighting your key skills and experience..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Experience Section -->
+                    <div id="section-work" class="section-content glass-card rounded-2xl p-6 hidden">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">💼</span>
+                                <h2 class="text-xl font-semibold neon-text">Work Experience</h2>
+                            </div>
+                            <button id="addWorkBtn" class="cyber-btn-primary px-4 py-2 rounded-lg text-sm font-medium text-white flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                <span>Add Experience</span>
+                            </button>
+                        </div>
+
+                        <div id="workList" class="space-y-4">
+                            <!-- Work experience items will be added here -->
+                        </div>
+                    </div>
+
+                    <!-- Education Section -->
+                    <div id="section-education" class="section-content glass-card rounded-2xl p-6 hidden">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <span class="text-2xl">🎓</span>
+                            <h2 class="text-xl font-semibold neon-text">Education</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="degree" class="block text-sm font-medium text-slate-300 mb-2">Degree & Major</label>
+                                <input type="text" id="degree" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="Bachelor of Science in Computer Science">
+                            </div>
+
+                            <div>
+                                <label for="school" class="block text-sm font-medium text-slate-300 mb-2">School/University</label>
+                                <input type="text" id="school" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="University of Technology">
+                            </div>
+
+                            <div>
+                                <label for="educationDuration" class="block text-sm font-medium text-slate-300 mb-2">Duration</label>
+                                <input type="text" id="educationDuration" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="2018 - 2022">
+                            </div>
+
+                            <div>
+                                <label for="educationLocation" class="block text-sm font-medium text-slate-300 mb-2">Location</label>
+                                <input type="text" id="educationLocation" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="Boston, MA">
+                            </div>
+
+                            <div>
+                                <label for="gpa" class="block text-sm font-medium text-slate-300 mb-2">GPA (Optional)</label>
+                                <input type="text" id="gpa" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200" placeholder="3.8/4.0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projects Section -->
+                    <div id="section-projects" class="section-content glass-card rounded-2xl p-6 hidden">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">💡</span>
+                                <h2 class="text-xl font-semibold neon-text">Projects</h2>
+                            </div>
+                            <button id="addProjectBtn" class="cyber-btn-primary px-4 py-2 rounded-lg text-sm font-medium text-white flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                <span>Add Project</span>
+                            </button>
+                        </div>
+
+                        <div id="projectsList" class="space-y-4">
+                            <!-- Project items will be added here -->
+                        </div>
+                    </div>
+
+                    <!-- Skills Section -->
+                    <div id="section-skills" class="section-content glass-card rounded-2xl p-6 hidden">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <span class="text-2xl">🛠️</span>
+                            <h2 class="text-xl font-semibold neon-text">Skills & More</h2>
+                        </div>
+
+                        <div>
+                            <label for="skillsText" class="block text-sm font-medium text-slate-300 mb-2">Skills (comma separated)</label>
+                            <textarea id="skillsText" rows="4" class="cyber-input w-full px-4 py-3 rounded-lg transition-all duration-200 resize-none" placeholder="JavaScript, React, Node.js, Python, SQL, Git, AWS, Docker"></textarea>
+                            <p class="text-xs text-slate-400 mt-2">Separate each skill with a comma</p>
+                        </div>
+
+                        <!-- Additional Sections -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                            <!-- Certifications -->
+                            <div class="glass-card rounded-xl p-4">
+                                <div class="flex items-center space-x-2 mb-3">
+                                    <span class="text-lg">🏆</span>
+                                    <h3 class="text-sm font-medium text-slate-300">Certifications</h3>
+                                </div>
+                                <textarea id="certificationsText" rows="3" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200 resize-none text-sm" placeholder="AWS Certified Developer, Google Cloud Professional"></textarea>
+                            </div>
+
+                            <!-- Languages -->
+                            <div class="glass-card rounded-xl p-4">
+                                <div class="flex items-center space-x-2 mb-3">
+                                    <span class="text-lg">🌍</span>
+                                    <h3 class="text-sm font-medium text-slate-300">Languages</h3>
+                                </div>
+                                <textarea id="languagesText" rows="3" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200 resize-none text-sm" placeholder="English (Native), Spanish (Fluent)"></textarea>
+                            </div>
+
+                            <!-- Awards -->
+                            <div class="glass-card rounded-xl p-4">
+                                <div class="flex items-center space-x-2 mb-3">
+                                    <span class="text-lg">⭐</span>
+                                    <h3 class="text-sm font-medium text-slate-300">Awards</h3>
+                                </div>
+                                <textarea id="awardsText" rows="3" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200 resize-none text-sm" placeholder="Employee of the Year 2023, Dean's List"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Preview Section -->
+            <div class="xl:col-span-6">
+                <div id="resumePreview" class="resume-preview rounded-2xl overflow-auto xl:sticky xl:top-8">
+                    <div class="flex" style="width: 794px; min-height: 1123px;">
+                        <!-- Dynamic Resume Content -->
+                        <div id="resumeContent" class="w-full" style="width: 794px; min-height: 1123px;">
+                            <!-- Content will be dynamically loaded based on template -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let workExperience = [];
+        let projects = [];
+        let sectionOrder = ['personal', 'work', 'education', 'projects', 'skills'];
+        let currentTemplate = 'modern-layout';
+        let resumeData = {
+            personal: { name: '', email: '', phone: '', location: '', website1: '', website2: '', leetcode: '', geeksforgeeks: '', summary: '' },
+            education: { degree: '', school: '', duration: '', location: '', gpa: '' },
+            skills: '', certifications: '', languages: '', awards: '',
+            workExperience: [], projects: [], sectionOrder: ['personal', 'work', 'education', 'projects', 'skills']
+        };
+
+        // Template Structures
+        const templateStructures = {
+            'modern-layout': {
+                name: 'Quantum Modern',
+                headerClass: 'header-modern',
+                sectionClass: 'section-modern',
+                layoutClass: 'layout-modern template-modern',
+                generateHTML: generateModernTemplate
+            },
+            'classic-layout': {
+                name: 'Executive Classic',
+                headerClass: 'header-classic',
+                sectionClass: 'section-classic',
+                layoutClass: 'layout-classic template-classic',
+                generateHTML: generateClassicTemplate
+            },
+            'creative-layout': {
+                name: 'Creative Vision',
+                headerClass: 'header-creative',
+                sectionClass: 'section-creative',
+                layoutClass: 'layout-creative template-creative',
+                generateHTML: generateCreativeTemplate
+            },
+            'professional-layout': {
+                name: 'Corporate Pro',
+                headerClass: 'header-classic',
+                sectionClass: 'section-classic',
+                layoutClass: 'layout-classic template-classic',
+                generateHTML: generateProfessionalTemplate
+            },
+            'tech-layout': {
+                name: 'Tech Innovator',
+                headerClass: 'header-modern',
+                sectionClass: 'section-modern',
+                layoutClass: 'layout-modern template-modern',
+                generateHTML: generateTechTemplate
+            },
+            'minimal-layout': {
+                name: 'Elegant Minimal',
+                headerClass: 'header-minimal',
+                sectionClass: 'section-minimal',
+                layoutClass: 'layout-minimal template-minimal',
+                generateHTML: generateMinimalTemplate
+            },
+            'data-layout': {
+                name: 'Data Scientist',
+                headerClass: 'header-modern',
+                sectionClass: 'section-modern',
+                layoutClass: 'layout-modern template-modern',
+                generateHTML: generateDataTemplate
+            },
+            'portfolio-layout': {
+                name: 'Creative Portfolio',
+                headerClass: 'header-creative',
+                sectionClass: 'section-creative',
+                layoutClass: 'layout-creative template-creative',
+                generateHTML: generatePortfolioTemplate
+            },
+            'cyber-layout': {
+                name: 'Cyber Clean',
+                headerClass: 'header-modern',
+                sectionClass: 'section-modern',
+                layoutClass: 'layout-modern template-modern',
+                generateHTML: generateCyberTemplate
+            }
+        };
+
+        // Initialize template on page load
+        function initializeTemplate() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const templateId = urlParams.get('template');
+            const structure = urlParams.get('structure');
+
+            // Get template info from session storage
+            const templateInfo = JSON.parse(sessionStorage.getItem('selectedTemplate') || '{}');
+
+            if (structure && templateStructures[structure]) {
+                currentTemplate = structure;
+                document.getElementById('templateName').textContent = `Using ${templateStructures[structure].name} template`;
+            }
+
+            loadFromStorage();
+            showSection('personal');
+            updatePreview();
+        }
+
+        // Template Generation Functions
+        function generateModernTemplate() {
+            return `
+                <div class="layout-modern p-8 space-y-8">
+                    ${generateModernHeader()}
+                    ${generateModernSummary()}
+                    ${generateModernWork()}
+                    ${generateModernEducation()}
+                    ${generateModernProjects()}
+                    ${generateModernSkills()}
+                    ${generateModernAdditional()}
+                </div>
+            `;
+        }
+
+        function generateModernHeader() {
+            const name = document.getElementById('name').value || 'Your Name';
+            const email = document.getElementById('email').value || 'email@example.com';
+            const phone = document.getElementById('phone').value || '(555) 123-4567';
+            const location = document.getElementById('location').value || 'Location';
+            const website1 = document.getElementById('website1').value;
+            const website2 = document.getElementById('website2').value;
+            const leetcode = document.getElementById('leetcode').value;
+            const geeksforgeeks = document.getElementById('geeksforgeeks').value;
+
+            let links = [];
+            if (website1) links.push(`<a href="${website1}" class="text-white hover:text-blue-200">Portfolio</a>`);
+            if (website2) links.push(`<a href="${website2}" class="text-white hover:text-blue-200">LinkedIn</a>`);
+            if (leetcode) links.push(`<a href="${leetcode}" class="text-white hover:text-blue-200">LeetCode</a>`);
+            if (geeksforgeeks) links.push(`<a href="${geeksforgeeks}" class="text-white hover:text-blue-200">GeeksforGeeks</a>`);
+
+            return `
+                <div class="header-modern text-center mb-8">
+                    <h1 class="text-4xl font-bold mb-4">${name}</h1>
+                    <div class="flex justify-center space-x-6 text-sm mb-4">
+                        <div class="flex items-center"><span class="mr-2">📧</span>${email}</div>
+                        <div class="flex items-center"><span class="mr-2">📱</span>${phone}</div>
+                        <div class="flex items-center"><span class="mr-2">📍</span>${location}</div>
+                    </div>
+                    ${links.length > 0 ? `<div class="flex justify-center space-x-4 text-sm">${links.join(' | ')}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function generateModernSummary() {
+            const summary = document.getElementById('summary').value;
+            if (!summary) return '';
+
+            return `
+                <div class="section-modern">
+                    <h2 class="text-xl font-bold mb-4">Professional Summary</h2>
+                    <p class="text-gray-700 leading-relaxed">${summary}</p>
+                </div>
+            `;
+        }
+
+        function generateModernWork() {
+            if (workExperience.length === 0) return '';
+
+            return `
+                <div class="section-modern">
+                    <h2 class="text-xl font-bold mb-4">Work Experience</h2>
+                    <div class="space-y-6">
+                        ${workExperience.map(work => `
+                            <div class="border-l-2 border-blue-500 pl-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">${work.title || 'Job Title'}</h3>
+                                        <p class="text-blue-600 font-medium">${work.company || 'Company Name'}</p>
+                                    </div>
+                                    <div class="text-right text-sm text-gray-600">
+                                        <p class="font-medium">${work.duration || 'Duration'}</p>
+                                        <p>${work.location || 'Location'}</p>
+                                    </div>
+                                </div>
+                                ${work.description ? `<p class="text-gray-700 text-sm leading-relaxed mt-2">${work.description}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateModernEducation() {
+            const degree = document.getElementById('degree').value;
+            const school = document.getElementById('school').value;
+            const duration = document.getElementById('educationDuration').value;
+            const location = document.getElementById('educationLocation').value;
+            const gpa = document.getElementById('gpa').value;
+
+            if (!degree && !school) return '';
+
+            return `
+                <div class="section-modern">
+                    <h2 class="text-xl font-bold mb-4">Education</h2>
+                    <div class="border-l-2 border-blue-500 pl-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${degree || 'Degree'}</h3>
+                                <p class="text-blue-600 font-medium">${school || 'School Name'}</p>
+                                ${gpa ? `<p class="text-sm text-gray-600 mt-1">GPA: ${gpa}</p>` : ''}
+                            </div>
+                            <div class="text-right text-sm text-gray-600">
+                                <p class="font-medium">${duration || 'Duration'}</p>
+                                <p>${location || 'Location'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateModernProjects() {
+            if (projects.length === 0) return '';
+
+            return `
+                <div class="section-modern">
+                    <h2 class="text-xl font-bold mb-4">Projects</h2>
+                    <div class="space-y-6">
+                        ${projects.map(project => `
+                            <div class="border-l-2 border-blue-500 pl-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-lg font-semibold text-gray-900">${project.name || 'Project Name'}</h3>
+                                    <span class="text-sm text-gray-600 font-medium">${project.duration || 'Duration'}</span>
+                                </div>
+                                ${project.description ? `<p class="text-gray-700 text-sm leading-relaxed mb-2">${project.description}</p>` : ''}
+                                ${project.technologies ? `<p class="text-sm text-blue-600"><strong>Technologies:</strong> ${project.technologies}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateModernSkills() {
+            const skills = document.getElementById('skillsText').value;
+            if (!skills) return '';
+
+            const skillArray = skills.split(',').map(skill => skill.trim()).filter(skill => skill);
+
+            return `
+                <div class="section-modern">
+                    <h2 class="text-xl font-bold mb-4">Technical Skills</h2>
+                    <div class="flex flex-wrap gap-2">
+                        ${skillArray.map(skill => `<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">${skill}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateModernAdditional() {
+            const certifications = document.getElementById('certificationsText').value;
+            const languages = document.getElementById('languagesText').value;
+            const awards = document.getElementById('awardsText').value;
+
+            let html = '';
+
+            if (certifications) {
+                const certArray = certifications.split(',').map(cert => cert.trim()).filter(cert => cert);
+                html += `
+                    <div class="section-modern">
+                        <h2 class="text-xl font-bold mb-4">Certifications</h2>
+                        <ul class="space-y-1">
+                            ${certArray.map(cert => `<li class="text-gray-700">• ${cert}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            if (languages) {
+                const langArray = languages.split(',').map(lang => lang.trim()).filter(lang => lang);
+                html += `
+                    <div class="section-modern">
+                        <h2 class="text-xl font-bold mb-4">Languages</h2>
+                        <ul class="space-y-1">
+                            ${langArray.map(lang => `<li class="text-gray-700">• ${lang}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            if (awards) {
+                const awardArray = awards.split(',').map(award => award.trim()).filter(award => award);
+                html += `
+                    <div class="section-modern">
+                        <h2 class="text-xl font-bold mb-4">Awards & Achievements</h2>
+                        <ul class="space-y-1">
+                            ${awardArray.map(award => `<li class="text-gray-700">• ${award}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        function generateClassicTemplate() {
+            return `
+                <div class="layout-classic p-8 space-y-6">
+                    ${generateClassicHeader()}
+                    ${generateClassicSummary()}
+                    ${generateClassicWork()}
+                    ${generateClassicEducation()}
+                    ${generateClassicProjects()}
+                    ${generateClassicSkills()}
+                    ${generateClassicAdditional()}
+                </div>
+            `;
+        }
+
+        function generateClassicHeader() {
+            const name = document.getElementById('name').value || 'Your Name';
+            const email = document.getElementById('email').value || 'email@example.com';
+            const phone = document.getElementById('phone').value || '(555) 123-4567';
+            const location = document.getElementById('location').value || 'Location';
+            const website1 = document.getElementById('website1').value;
+            const website2 = document.getElementById('website2').value;
+
+            return `
+                <div class="header-classic text-center pb-6">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-3">${name}</h1>
+                    <div class="flex justify-center space-x-8 text-sm text-gray-700">
+                        <span>${email}</span>
+                        <span>${phone}</span>
+                        <span>${location}</span>
+                    </div>
+                    ${website1 || website2 ? `
+                        <div class="flex justify-center space-x-6 text-sm text-blue-600 mt-2">
+                            ${website1 ? `<a href="${website1}">Portfolio</a>` : ''}
+                            ${website2 ? `<a href="${website2}">LinkedIn</a>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function generateClassicSummary() {
+            const summary = document.getElementById('summary').value;
+            if (!summary) return '';
+
+            return `
+                <div class="section-classic">
+                    <h2 class="text-lg font-bold mb-3">PROFESSIONAL SUMMARY</h2>
+                    <p class="text-gray-700 leading-relaxed text-justify">${summary}</p>
+                </div>
+            `;
+        }
+
+        function generateClassicWork() {
+            if (workExperience.length === 0) return '';
+
+            return `
+                <div class="section-classic">
+                    <h2 class="text-lg font-bold mb-3">WORK EXPERIENCE</h2>
+                    <div class="space-y-4">
+                        ${workExperience.map(work => `
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <div>
+                                        <h3 class="font-bold text-gray-900">${work.title || 'Job Title'}</h3>
+                                        <p class="text-gray-700 italic">${work.company || 'Company Name'}</p>
+                                    </div>
+                                    <div class="text-right text-sm text-gray-600">
+                                        <p>${work.duration || 'Duration'}</p>
+                                        <p>${work.location || 'Location'}</p>
+                                    </div>
+                                </div>
+                                ${work.description ? `<p class="text-gray-700 text-sm leading-relaxed mt-2">${work.description}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateClassicEducation() {
+            const degree = document.getElementById('degree').value;
+            const school = document.getElementById('school').value;
+            const duration = document.getElementById('educationDuration').value;
+            const location = document.getElementById('educationLocation').value;
+            const gpa = document.getElementById('gpa').value;
+
+            if (!degree && !school) return '';
+
+            return `
+                <div class="section-classic">
+                    <h2 class="text-lg font-bold mb-3">EDUCATION</h2>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-gray-900">${degree || 'Degree'}</h3>
+                            <p class="text-gray-700 italic">${school || 'School Name'}</p>
+                            ${gpa ? `<p class="text-sm text-gray-600">GPA: ${gpa}</p>` : ''}
+                        </div>
+                        <div class="text-right text-sm text-gray-600">
+                            <p>${duration || 'Duration'}</p>
+                            <p>${location || 'Location'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateClassicProjects() {
+            if (projects.length === 0) return '';
+
+            return `
+                <div class="section-classic">
+                    <h2 class="text-lg font-bold mb-3">PROJECTS</h2>
+                    <div class="space-y-4">
+                        ${projects.map(project => `
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-900">${project.name || 'Project Name'}</h3>
+                                    <span class="text-sm text-gray-600">${project.duration || 'Duration'}</span>
+                                </div>
+                                ${project.description ? `<p class="text-gray-700 text-sm leading-relaxed mb-1">${project.description}</p>` : ''}
+                                ${project.technologies ? `<p class="text-sm text-gray-600"><strong>Technologies:</strong> ${project.technologies}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateClassicSkills() {
+            const skills = document.getElementById('skillsText').value;
+            if (!skills) return '';
+
+            return `
+                <div class="section-classic">
+                    <h2 class="text-lg font-bold mb-3">TECHNICAL SKILLS</h2>
+                    <p class="text-gray-700">${skills}</p>
+                </div>
+            `;
+        }
+
+        function generateClassicAdditional() {
+            const certifications = document.getElementById('certificationsText').value;
+            const languages = document.getElementById('languagesText').value;
+            const awards = document.getElementById('awardsText').value;
+
+            let html = '';
+
+            if (certifications) {
+                html += `
+                    <div class="section-classic">
+                        <h2 class="text-lg font-bold mb-3">CERTIFICATIONS</h2>
+                        <p class="text-gray-700">${certifications}</p>
+                    </div>
+                `;
+            }
+
+            if (languages) {
+                html += `
+                    <div class="section-classic">
+                        <h2 class="text-lg font-bold mb-3">LANGUAGES</h2>
+                        <p class="text-gray-700">${languages}</p>
+                    </div>
+                `;
+            }
+
+            if (awards) {
+                html += `
+                    <div class="section-classic">
+                        <h2 class="text-lg font-bold mb-3">AWARDS & ACHIEVEMENTS</h2>
+                        <p class="text-gray-700">${awards}</p>
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        function generateCreativeTemplate() {
+            return `
+                <div class="layout-creative p-8 space-y-8">
+                    <div class="col-span-2">
+                        ${generateCreativeHeader()}
+                        ${generateCreativeSummary()}
+                        ${generateCreativeWork()}
+                        ${generateCreativeProjects()}
+                    </div>
+                    <div class="space-y-6">
+                        ${generateCreativeEducation()}
+                        ${generateCreativeSkills()}
+                        ${generateCreativeAdditional()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCreativeHeader() {
+            const name = document.getElementById('name').value || 'Your Name';
+            const email = document.getElementById('email').value || 'email@example.com';
+            const phone = document.getElementById('phone').value || '(555) 123-4567';
+            const location = document.getElementById('location').value || 'Location';
+
+            return `
+                <div class="header-creative text-center mb-8 relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-lg"></div>
+                    <div class="relative z-10 p-8">
+                        <h1 class="text-4xl font-bold mb-4">${name}</h1>
+                        <div class="flex justify-center space-x-6 text-sm">
+                            <span>📧 ${email}</span>
+                            <span>📱 ${phone}</span>
+                            <span>📍 ${location}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCreativeSummary() {
+            const summary = document.getElementById('summary').value;
+            if (!summary) return '';
+
+            return `
+                <div class="section-creative">
+                    <h2 class="text-2xl font-bold mb-4">Professional Summary</h2>
+                    <p class="text-gray-700 leading-relaxed text-lg">${summary}</p>
+                </div>
+            `;
+        }
+
+        function generateCreativeWork() {
+            if (workExperience.length === 0) return '';
+
+            return `
+                <div class="section-creative">
+                    <h2 class="text-2xl font-bold mb-6">Experience</h2>
+                    <div class="space-y-8">
+                        ${workExperience.map(work => `
+                            <div class="relative pl-8 border-l-4 border-gradient-to-b from-blue-500 to-purple-500">
+                                <div class="absolute w-4 h-4 bg-blue-500 rounded-full -left-2 top-2"></div>
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-900">${work.title || 'Job Title'}</h3>
+                                        <p class="text-purple-600 font-semibold text-lg">${work.company || 'Company Name'}</p>
+                                    </div>
+                                    <div class="text-right text-sm text-gray-600">
+                                        <p class="font-semibold">${work.duration || 'Duration'}</p>
+                                        <p>${work.location || 'Location'}</p>
+                                    </div>
+                                </div>
+                                ${work.description ? `<p class="text-gray-700 leading-relaxed">${work.description}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCreativeEducation() {
+            const degree = document.getElementById('degree').value;
+            const school = document.getElementById('school').value;
+            const duration = document.getElementById('educationDuration').value;
+            const location = document.getElementById('educationLocation').value;
+            const gpa = document.getElementById('gpa').value;
+
+            if (!degree && !school) return '';
+
+            return `
+                <div class="section-creative bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+                    <h2 class="text-xl font-bold mb-4">Education</h2>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">${degree || 'Degree'}</h3>
+                        <p class="text-purple-600 font-semibold">${school || 'School Name'}</p>
+                        <div class="text-sm text-gray-600 mt-2">
+                            <p>${duration || 'Duration'} • ${location || 'Location'}</p>
+                            ${gpa ? `<p>GPA: ${gpa}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCreativeProjects() {
+            if (projects.length === 0) return '';
+
+            return `
+                <div class="section-creative">
+                    <h2 class="text-2xl font-bold mb-6">Projects</h2>
+                    <div class="space-y-6">
+                        ${projects.map(project => `
+                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-xl font-bold text-gray-900">${project.name || 'Project Name'}</h3>
+                                    <span class="text-sm text-gray-600 font-medium bg-white px-3 py-1 rounded-full">${project.duration || 'Duration'}</span>
+                                </div>
+                                ${project.description ? `<p class="text-gray-700 leading-relaxed mb-3">${project.description}</p>` : ''}
+                                ${project.technologies ? `<p class="text-sm text-purple-600 font-semibold"><strong>Tech Stack:</strong> ${project.technologies}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCreativeSkills() {
+            const skills = document.getElementById('skillsText').value;
+            if (!skills) return '';
+
+            const skillArray = skills.split(',').map(skill => skill.trim()).filter(skill => skill);
+
+            return `
+                <div class="section-creative bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg">
+                    <h2 class="text-xl font-bold mb-4">Skills</h2>
+                    <div class="flex flex-wrap gap-3">
+                        ${skillArray.map(skill => `<span class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-medium">${skill}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCreativeAdditional() {
+            const certifications = document.getElementById('certificationsText').value;
+            const languages = document.getElementById('languagesText').value;
+            const awards = document.getElementById('awardsText').value;
+
+            let html = '';
+
+            if (certifications || languages || awards) {
+                html += '<div class="space-y-4">';
+
+                if (certifications) {
+                    const certArray = certifications.split(',').map(cert => cert.trim()).filter(cert => cert);
+                    html += `
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-green-800 mb-2">🏆 Certifications</h3>
+                            <ul class="space-y-1">
+                                ${certArray.map(cert => `<li class="text-green-700 text-sm">• ${cert}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                if (languages) {
+                    const langArray = languages.split(',').map(lang => lang.trim()).filter(lang => lang);
+                    html += `
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-orange-800 mb-2">🌍 Languages</h3>
+                            <ul class="space-y-1">
+                                ${langArray.map(lang => `<li class="text-orange-700 text-sm">• ${lang}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                if (awards) {
+                    const awardArray = awards.split(',').map(award => award.trim()).filter(award => award);
+                    html += `
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-yellow-800 mb-2">⭐ Awards</h3>
+                            <ul class="space-y-1">
+                                ${awardArray.map(award => `<li class="text-yellow-700 text-sm">• ${award}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+            }
+
+            return html;
+        }
+
+        function generateMinimalTemplate() {
+            return `
+                <div class="layout-minimal p-8 space-y-6">
+                    ${generateMinimalHeader()}
+                    ${generateMinimalSummary()}
+                    ${generateMinimalWork()}
+                    ${generateMinimalEducation()}
+                    ${generateMinimalProjects()}
+                    ${generateMinimalSkills()}
+                    ${generateMinimalAdditional()}
+                </div>
+            `;
+        }
+
+        function generateMinimalHeader() {
+            const name = document.getElementById('name').value || 'Your Name';
+            const email = document.getElementById('email').value || 'email@example.com';
+            const phone = document.getElementById('phone').value || '(555) 123-4567';
+            const location = document.getElementById('location').value || 'Location';
+
+            return `
+                <div class="header-minimal">
+                    <h1 class="text-2xl font-light text-gray-900 mb-2">${name}</h1>
+                    <div class="text-sm text-gray-600 space-x-4">
+                        <span>${email}</span>
+                        <span>${phone}</span>
+                        <span>${location}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateMinimalSummary() {
+            const summary = document.getElementById('summary').value;
+            if (!summary) return '';
+
+            return `
+                <div class="section-minimal">
+                    <h2>Summary</h2>
+                    <p class="text-gray-700 leading-relaxed">${summary}</p>
+                </div>
+            `;
+        }
+
+        function generateMinimalWork() {
+            if (workExperience.length === 0) return '';
+
+            return `
+                <div class="section-minimal">
+                    <h2>Experience</h2>
+                    <div class="space-y-4">
+                        ${workExperience.map(work => `
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">${work.title || 'Job Title'}</h3>
+                                        <p class="text-gray-600">${work.company || 'Company Name'}</p>
+                                    </div>
+                                    <div class="text-right text-sm text-gray-500">
+                                        <p>${work.duration || 'Duration'}</p>
+                                        <p>${work.location || 'Location'}</p>
+                                    </div>
+                                </div>
+                                ${work.description ? `<p class="text-gray-700 text-sm leading-relaxed mt-1">${work.description}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateMinimalEducation() {
+            const degree = document.getElementById('degree').value;
+            const school = document.getElementById('school').value;
+            const duration = document.getElementById('educationDuration').value;
+            const location = document.getElementById('educationLocation').value;
+            const gpa = document.getElementById('gpa').value;
+
+            if (!degree && !school) return '';
+
+            return `
+                <div class="section-minimal">
+                    <h2>Education</h2>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium text-gray-900">${degree || 'Degree'}</h3>
+                            <p class="text-gray-600">${school || 'School Name'}</p>
+                            ${gpa ? `<p class="text-sm text-gray-500">GPA: ${gpa}</p>` : ''}
+                        </div>
+                        <div class="text-right text-sm text-gray-500">
+                            <p>${duration || 'Duration'}</p>
+                            <p>${location || 'Location'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateMinimalProjects() {
+            if (projects.length === 0) return '';
+
+            return `
+                <div class="section-minimal">
+                    <h2>Projects</h2>
+                    <div class="space-y-3">
+                        ${projects.map(project => `
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-medium text-gray-900">${project.name || 'Project Name'}</h3>
+                                    <span class="text-sm text-gray-500">${project.duration || 'Duration'}</span>
+                                </div>
+                                ${project.description ? `<p class="text-gray-700 text-sm leading-relaxed mb-1">${project.description}</p>` : ''}
+                                ${project.technologies ? `<p class="text-xs text-gray-500">${project.technologies}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateMinimalSkills() {
+            const skills = document.getElementById('skillsText').value;
+            if (!skills) return '';
+
+            return `
+                <div class="section-minimal">
+                    <h2>Skills</h2>
+                    <p class="text-gray-700">${skills}</p>
+                </div>
+            `;
+        }
+
+        function generateMinimalAdditional() {
+            const certifications = document.getElementById('certificationsText').value;
+            const languages = document.getElementById('languagesText').value;
+            const awards = document.getElementById('awardsText').value;
+
+            let html = '';
+
+            if (certifications) {
+                html += `
+                    <div class="section-minimal">
+                        <h2>Certifications</h2>
+                        <p class="text-gray-700">${certifications}</p>
+                    </div>
+                `;
+            }
+
+            if (languages) {
+                html += `
+                    <div class="section-minimal">
+                        <h2>Languages</h2>
+                        <p class="text-gray-700">${languages}</p>
+                    </div>
+                `;
+            }
+
+            if (awards) {
+                html += `
+                    <div class="section-minimal">
+                        <h2>Awards</h2>
+                        <p class="text-gray-700">${awards}</p>
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        // Simplified template generators for other layouts (using existing patterns)
+        function generateProfessionalTemplate() { return generateClassicTemplate(); }
+        function generateTechTemplate() { return generateModernTemplate(); }
+        function generateDataTemplate() { return generateModernTemplate(); }
+        function generatePortfolioTemplate() { return generateCreativeTemplate(); }
+        function generateCyberTemplate() { return generateModernTemplate(); }
+
+        // Navigation and Section Management
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('fade-in');
+            });
+
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('nav-btn-active');
+            });
+
+            // Show selected section with animation
+            const targetSection = document.getElementById('section-' + sectionName);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('fade-in');
+            }
+
+            // Add active class to selected nav button
+            const targetNav = document.getElementById('nav-' + sectionName);
+            if (targetNav) {
+                targetNav.classList.add('nav-btn-active');
+            }
+        }
+
+        // Section Reordering
+        function moveSectionUp(sectionName) {
+            const currentIndex = sectionOrder.indexOf(sectionName);
+            if (currentIndex > 0) {
+                [sectionOrder[currentIndex], sectionOrder[currentIndex - 1]] = [sectionOrder[currentIndex - 1], sectionOrder[currentIndex]];
+                updateSectionOrder();
+                updatePreview();
+            }
+        }
+
+        function moveSectionDown(sectionName) {
+            const currentIndex = sectionOrder.indexOf(sectionName);
+            if (currentIndex < sectionOrder.length - 1) {
+                [sectionOrder[currentIndex], sectionOrder[currentIndex + 1]] = [sectionOrder[currentIndex + 1], sectionOrder[currentIndex]];
+                updateSectionOrder();
+                updatePreview();
+            }
+        }
+
+        function updateSectionOrder() {
+            const navigation = document.getElementById('sectionNavigation');
+            const sectionElements = Array.from(navigation.children);
+
+            sectionOrder.forEach(sectionName => {
+                const element = sectionElements.find(el => el.getAttribute('data-section') === sectionName);
+                if (element) {
+                    navigation.appendChild(element);
+                }
+            });
+        }
+
+        // Work Experience Management
+        function addWorkExperience() {
+            const workItem = {
+                id: Date.now(),
+                title: '',
+                company: '',
+                duration: '',
+                location: '',
+                description: ''
+            };
+            workExperience.push(workItem);
+            renderWorkExperience();
+        }
+
+        function renderWorkExperience() {
+            const workList = document.getElementById('workList');
+            workList.innerHTML = workExperience.map(work => `
+                <div class="glass-card rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Job Title</label>
+                            <input type="text" value="${work.title}" onchange="updateWorkItem(${work.id}, 'title', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200" placeholder="Software Engineer">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Company</label>
+                            <input type="text" value="${work.company}" onchange="updateWorkItem(${work.id}, 'company', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200" placeholder="Tech Company Inc.">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Duration</label>
+                            <input type="text" value="${work.duration}" onchange="updateWorkItem(${work.id}, 'duration', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200" placeholder="Jan 2022 - Present">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Location</label>
+                            <input type="text" value="${work.location}" onchange="updateWorkItem(${work.id}, 'location', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200" placeholder="San Francisco, CA">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+                        <textarea rows="3" onchange="updateWorkItem(${work.id}, 'description', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200 resize-none" placeholder="Describe your responsibilities and achievements...">${work.description}</textarea>
+                    </div>
+                    <button onclick="removeWorkItem(${work.id})" class="cyber-btn-secondary px-3 py-1 rounded text-sm font-medium text-red-400 border-red-400 hover:bg-red-500/20">
+                        🗑️ Remove
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateWorkItem(id, field, value) {
+            const workItem = workExperience.find(item => item.id === id);
+            if (workItem) {
+                workItem[field] = value;
+                updatePreview();
+            }
+        }
+
+        function removeWorkItem(id) {
+            workExperience = workExperience.filter(item => item.id !== id);
+            renderWorkExperience();
+            updatePreview();
+        }
+
+        // Project Management
+        function addProject() {
+            const projectItem = {
+                id: Date.now(),
+                name: '',
+                duration: '',
+                description: '',
+                technologies: ''
+            };
+            projects.push(projectItem);
+            renderProjects();
+        }
+
+        function renderProjects() {
+            const projectsList = document.getElementById('projectsList');
+            projectsList.innerHTML = projects.map(project => `
+                <div class="glass-card rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Project Name</label>
+                            <input type="text" value="${project.name}" onchange="updateProjectItem(${project.id}, 'name', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200" placeholder="E-commerce Platform">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Duration</label>
+                            <input type="text" value="${project.duration}" onchange="updateProjectItem(${project.id}, 'duration', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200" placeholder="3 months">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+                        <textarea rows="3" onchange="updateProjectItem(${project.id}, 'description', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200 resize-none" placeholder="Describe the project and your role...">${project.description}</textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Technologies Used</label>
+                        <input type="text" value="${project.technologies}" onchange="updateProjectItem(${project.id}, 'technologies', this.value)" class="cyber-input w-full px-3 py-2 rounded-lg transition-all duration-200" placeholder="React, Node.js, MongoDB">
+                    </div>
+                    <button onclick="removeProjectItem(${project.id})" class="cyber-btn-secondary px-3 py-1 rounded text-sm font-medium text-red-400 border-red-400 hover:bg-red-500/20">
+                        🗑️ Remove
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateProjectItem(id, field, value) {
+            const projectItem = projects.find(item => item.id === id);
+            if (projectItem) {
+                projectItem[field] = value;
+                updatePreview();
+            }
+        }
+
+        function removeProjectItem(id) {
+            projects = projects.filter(item => item.id !== id);
+            renderProjects();
+            updatePreview();
+        }
+
+        // Preview Update Function
+        function updatePreview() {
+            const templateStructure = templateStructures[currentTemplate];
+            if (templateStructure && templateStructure.generateHTML) {
+                const resumeContent = document.getElementById('resumeContent');
+                resumeContent.innerHTML = templateStructure.generateHTML();
+                resumeContent.className = `w-full ${templateStructure.layoutClass}`;
+            }
+        }
+
+        // Storage Functions
+        function saveToStorage() {
+            resumeData.personal.name = document.getElementById('name').value;
+            resumeData.personal.email = document.getElementById('email').value;
+            resumeData.personal.phone = document.getElementById('phone').value;
+            resumeData.personal.location = document.getElementById('location').value;
+            resumeData.personal.website1 = document.getElementById('website1').value;
+            resumeData.personal.website2 = document.getElementById('website2').value;
+            resumeData.personal.leetcode = document.getElementById('leetcode').value;
+            resumeData.personal.geeksforgeeks = document.getElementById('geeksforgeeks').value;
+            resumeData.personal.summary = document.getElementById('summary').value;
+
+            resumeData.education.degree = document.getElementById('degree').value;
+            resumeData.education.school = document.getElementById('school').value;
+            resumeData.education.duration = document.getElementById('educationDuration').value;
+            resumeData.education.location = document.getElementById('educationLocation').value;
+            resumeData.education.gpa = document.getElementById('gpa').value;
+
+            resumeData.skills = document.getElementById('skillsText').value;
+            resumeData.certifications = document.getElementById('certificationsText').value;
+            resumeData.languages = document.getElementById('languagesText').value;
+            resumeData.awards = document.getElementById('awardsText').value;
+
+            resumeData.workExperience = [...workExperience];
+            resumeData.projects = [...projects];
+            resumeData.sectionOrder = [...sectionOrder];
+
+            const storageKey = `resumeData_${currentTemplate}`;
+            sessionStorage.setItem(storageKey, JSON.stringify(resumeData));
+        }
+
+        function loadFromStorage() {
+            const storageKey = `resumeData_${currentTemplate}`;
+            const savedData = sessionStorage.getItem(storageKey);
+
+            if (savedData) {
+                resumeData = JSON.parse(savedData);
+
+                // Load personal data
+                document.getElementById('name').value = resumeData.personal.name || '';
+                document.getElementById('email').value = resumeData.personal.email || '';
+                document.getElementById('phone').value = resumeData.personal.phone || '';
+                document.getElementById('location').value = resumeData.personal.location || '';
+                document.getElementById('website1').value = resumeData.personal.website1 || '';
+                document.getElementById('website2').value = resumeData.personal.website2 || '';
+                document.getElementById('leetcode').value = resumeData.personal.leetcode || '';
+                document.getElementById('geeksforgeeks').value = resumeData.personal.geeksforgeeks || '';
+                document.getElementById('summary').value = resumeData.personal.summary || '';
+
+                // Load education data
+                document.getElementById('degree').value = resumeData.education.degree || '';
+                document.getElementById('school').value = resumeData.education.school || '';
+                document.getElementById('educationDuration').value = resumeData.education.duration || '';
+                document.getElementById('educationLocation').value = resumeData.education.location || '';
+                document.getElementById('gpa').value = resumeData.education.gpa || '';
+
+                // Load other sections
+                document.getElementById('skillsText').value = resumeData.skills || '';
+                document.getElementById('certificationsText').value = resumeData.certifications || '';
+                document.getElementById('languagesText').value = resumeData.languages || '';
+                document.getElementById('awardsText').value = resumeData.awards || '';
+
+                // Load work experience and projects
+                workExperience = resumeData.workExperience || [];
+                projects = resumeData.projects || [];
+
+                // Load section order
+                if (resumeData.sectionOrder) {
+                    sectionOrder = [...resumeData.sectionOrder];
+                    updateSectionOrder();
+                }
+
+                renderWorkExperience();
+                renderProjects();
+            }
+        }
+
+        // Save Resume Function
+        function saveResume() {
+            saveToStorage();
+
+            const button = event.target;
+            const originalText = button.textContent;
+            const originalClass = button.className;
+
+            button.textContent = '✅ Saved!';
+            button.classList.add('bg-green-600/80', 'border-green-500');
+
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.className = originalClass;
+            }, 2000);
+        }
+
+        // PDF Download Function
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const name = document.getElementById('name').value || 'Resume';
+
+            const downloadBtn = document.querySelector('button[onclick="downloadPDF()"]');
+            const originalText = downloadBtn.textContent;
+            downloadBtn.textContent = '⏳ Generating PDF...';
+            downloadBtn.disabled = true;
+
+            try {
+                const doc = new jsPDF({
+                    unit: 'pt',
+                    format: 'a4',
+                    orientation: 'portrait'
+                });
+
+                let yPosition = 50;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const margin = 40;
+                const contentWidth = pageWidth - (margin * 2);
+
+                function addText(text, fontSize = 12, isBold = false, isItalic = false) {
+                    if (!text || text.trim() === '') return yPosition;
+
+                    doc.setFontSize(fontSize);
+                    if (isBold && isItalic) {
+                        doc.setFont('helvetica', 'bolditalic');
+                    } else if (isBold) {
+                        doc.setFont('helvetica', 'bold');
+                    } else if (isItalic) {
+                        doc.setFont('helvetica', 'italic');
+                    } else {
+                        doc.setFont('helvetica', 'normal');
+                    }
+
+                    const lines = doc.splitTextToSize(text, contentWidth);
+                    lines.forEach(line => {
+                        if (yPosition > doc.internal.pageSize.getHeight() - 50) {
+                            doc.addPage();
+                            yPosition = 50;
+                        }
+                        doc.text(line, margin, yPosition);
+                        yPosition += fontSize + 4;
+                    });
+
+                    return yPosition;
+                }
+
+                // Add content based on current template structure
+                const fullName = document.getElementById('name').value || 'Your Name';
+                yPosition = addText(fullName, 24, true);
+                yPosition += 10;
+
+                // Contact info
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const location = document.getElementById('location').value;
+
+                let contactInfo = [];
+                if (email) contactInfo.push(email);
+                if (phone) contactInfo.push(phone);
+                if (location) contactInfo.push(location);
+
+                if (contactInfo.length > 0) {
+                    yPosition = addText(contactInfo.join(' | '), 10);
+                }
+
+                yPosition += 15;
+
+                // Add sections based on section order
+                for (const sectionName of sectionOrder) {
+                    if (sectionName === 'personal') {
+                        const summary = document.getElementById('summary').value;
+                        if (summary) {
+                            yPosition = addText('PROFESSIONAL SUMMARY', 14, true);
+                            yPosition += 8;
+                            yPosition = addText(summary, 11);
+                            yPosition += 20;
+                        }
+                    } else if (sectionName === 'work') {
+                        if (workExperience.length > 0) {
+                            yPosition = addText('WORK EXPERIENCE', 14, true);
+                            yPosition += 8;
+
+                            workExperience.forEach(work => {
+                                if (yPosition > doc.internal.pageSize.getHeight() - 150) {
+                                    doc.addPage();
+                                    yPosition = 50;
+                                }
+
+                                yPosition = addText(work.title || 'Job Title', 12, true);
+                                yPosition = addText((work.company || 'Company') + ' | ' + (work.duration || 'Duration') + ' | ' + (work.location || 'Location'), 10);
+                                if (work.description) {
+                                    yPosition = addText(work.description, 10);
+                                }
+                                yPosition += 15;
+                            });
+                            yPosition += 10;
+                        }
+                    } else if (sectionName === 'education') {
+                        const degree = document.getElementById('degree').value;
+                        const school = document.getElementById('school').value;
+                        const duration = document.getElementById('educationDuration').value;
+                        const educationLocation = document.getElementById('educationLocation').value;
+                        const gpa = document.getElementById('gpa').value;
+
+                        if (degree || school) {
+                            yPosition = addText('EDUCATION', 14, true);
+                            yPosition += 8;
+                            yPosition = addText(degree || 'Degree', 12, true);
+                            yPosition = addText((school || 'School') + ' | ' + (duration || 'Duration') + ' | ' + (educationLocation || 'Location'), 10);
+                            if (gpa) {
+                                yPosition = addText('GPA: ' + gpa, 10);
+                            }
+                            yPosition += 20;
+                        }
+                    } else if (sectionName === 'projects') {
+                        if (projects.length > 0) {
+                            yPosition = addText('PROJECTS', 14, true);
+                            yPosition += 8;
+
+                            projects.forEach(project => {
+                                if (yPosition > doc.internal.pageSize.getHeight() - 150) {
+                                    doc.addPage();
+                                    yPosition = 50;
+                                }
+
+                                yPosition = addText((project.name || 'Project Name') + (project.duration ? ' | ' + project.duration : ''), 12, true);
+                                if (project.description) {
+                                    yPosition = addText(project.description, 10);
+                                }
+                                if (project.technologies) {
+                                    yPosition = addText('Technologies: ' + project.technologies, 10);
+                                }
+                                yPosition += 15;
+                            });
+                            yPosition += 10;
+                        }
+                    } else if (sectionName === 'skills') {
+                        const skills = document.getElementById('skillsText').value;
+                        if (skills) {
+                            yPosition = addText('TECHNICAL SKILLS', 14, true);
+                            yPosition += 8;
+                            yPosition = addText(skills, 10);
+                            yPosition += 20;
+                        }
+
+                        // Additional sections
+                        const certifications = document.getElementById('certificationsText').value;
+                        if (certifications) {
+                            yPosition = addText('CERTIFICATIONS', 14, true);
+                            yPosition += 8;
+                            yPosition = addText(certifications, 10);
+                            yPosition += 20;
+                        }
+
+                        const languages = document.getElementById('languagesText').value;
+                        if (languages) {
+                            yPosition = addText('LANGUAGES', 14, true);
+                            yPosition += 8;
+                            yPosition = addText(languages, 10);
+                            yPosition += 20;
+                        }
+
+                        const awards = document.getElementById('awardsText').value;
+                        if (awards) {
+                            yPosition = addText('AWARDS & ACHIEVEMENTS', 14, true);
+                            yPosition += 8;
+                            yPosition = addText(awards, 10);
+                            yPosition += 20;
+                        }
+                    }
+                }
+
+                doc.save(`${name.replace(/\s+/g, '_')}_Resume.pdf`);
+
+            } catch (error) {
+                console.error('PDF generation failed:', error);
+                alert('PDF generation failed. Please try again.');
+            } finally {
+                downloadBtn.textContent = originalText;
+                downloadBtn.disabled = false;
+            }
+        }
+
+        // Navigation Functions
+        function goBack() {
+            window.location.href = 'popularresume.html';
+        }
+
+        // Event Listeners Setup
+        function setupEventListeners() {
+            // Form input listeners
+            const inputs = ['name', 'email', 'phone', 'location', 'website1', 'website2', 'leetcode', 'geeksforgeeks', 'summary', 'degree', 'school', 'educationDuration', 'educationLocation', 'gpa', 'skillsText', 'certificationsText', 'languagesText', 'awardsText'];
+
+            inputs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', () => {
+                        updatePreview();
+                        saveToStorage();
+                    });
+                }
+            });
+
+            // Button listeners
+            document.getElementById('addWorkBtn').addEventListener('click', addWorkExperience);
+            document.getElementById('addProjectBtn').addEventListener('click', addProject);
+        }
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTemplate();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>

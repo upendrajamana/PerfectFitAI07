@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us - OptiCV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0a0a0f;
+      --text-color: #ffffff;
+      --input-bg: #1a1a24;
+      --form-bg: #12121a;
+      --highlight: #ffa94d;
+      --flash-bg: #1e1e1e;
+      --flash-border: #805cf2;
+      --hover-color: linear-gradient(135deg, #4f3cc9, #7b5aff);
+      --accent-color: #805cf2;
+      --accent-gradient: linear-gradient(135deg, #805cf2, #4f3cc9);
+      --secondary-accent: #ffa94d;
+      --secondary-gradient: linear-gradient(135deg, #ffa94d, #ff7b00);
+      --border-radius: 12px;
+      --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .light-mode {
+      --bg-color: #f8f9fc;
+      --text-color: #1a1a2e;
+      --input-bg: #ffffff;
+      --form-bg: #ffffff;
+      --highlight: #d17c00;
+      --flash-bg: #f0f0f0;
+      --flash-border: #805cf2;
+      --hover-color: linear-gradient(135deg, #e8e4ff, #d0cfff);
+      --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: var(--transition);
+      background-image: radial-gradient(circle at 10% 20%, rgba(90, 92, 242, 0.05) 0%, rgba(0, 0, 0, 0) 80%),
+                        radial-gradient(circle at 90% 80%, rgba(255, 169, 77, 0.05) 0%, rgba(0, 0, 0, 0) 80%);
+      background-attachment: fixed;
+      line-height: 1.6;
+    }
+
+    .light-mode body {
+      background-image: radial-gradient(circle at 10% 20%, rgba(90, 92, 242, 0.03) 0%, rgba(0, 0, 0, 0) 80%),
+                        radial-gradient(circle at 90% 80%, rgba(255, 169, 77, 0.03) 0%, rgba(0, 0, 0, 0) 80%);
+    }
+
+    .custom-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 5%;
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+    }
+
+    .light-mode .custom-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .logo {
+      color: var(--text-color);
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 30%;
+      height: 3px;
+      background: var(--secondary-gradient);
+      border-radius: 2px;
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .nav-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--hover-color);
+      z-index: -1;
+      opacity: 0;
+      transition: var(--transition);
+      transform: translateY(100%);
+      border-radius: var(--border-radius);
+    }
+
+    .nav-btn:hover::before {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .toggle-theme {
+      background: var(--accent-gradient);
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(128, 92, 242, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-theme:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(128, 92, 242, 0.4);
+    }
+
+    .toggle-theme svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 100px 40px 60px;
+      max-width: 900px;
+      margin: auto;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 4px;
+      background: var(--secondary-gradient);
+      border-radius: 2px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--text-color) 30%, var(--accent-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+
+    .hero p {
+      margin-top: 24px;
+      color: var(--text-color);
+      opacity: 0.7;
+      font-size: 18px;
+      line-height: 1.8;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 40px;
+      background-color: var(--form-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .light-mode .form-container {
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent-gradient);
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 40px;
+      row-gap: 24px;
+    }
+
+    form div {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      font-size: 15px;
+      transition: var(--transition);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .light-mode input, .light-mode textarea {
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(128, 92, 242, 0.2);
+    }
+
+    textarea {
+      grid-column: span 2;
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .submit-btn {
+      grid-column: span 2;
+      margin-top: 12px;
+      padding: 16px;
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+      font-weight: 600;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 16px;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(128, 92, 242, 0.3);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #7b5aff, #4f3cc9);
+      z-index: -1;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(128, 92, 242, 0.4);
+    }
+
+    .submit-btn:hover::before {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .custom-header {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px 5%;
+      }
+
+      .nav-container {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .nav-links {
+        gap: 8px;
+      }
+
+      .nav-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      form {
+        grid-template-columns: 1fr;
+      }
+
+      textarea, .submit-btn {
+        grid-column: span 1;
+      }
+
+      .form-container {
+        padding: 30px 20px;
+      }
+    }
+
+    .flash-msg {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--flash-bg);
+      color: #00ff99;
+      padding: 16px 28px;
+      border-left: 6px solid var(--flash-border);
+      border-radius: var(--border-radius);
+      font-weight: bold;
+      z-index: 9999;
+      animation: flyUp 5s ease-in-out forwards;
+      box-shadow: var(--box-shadow);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .flash-msg svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    @keyframes flyUp {
+      0% { bottom: -100px; opacity: 0; }
+      20% { bottom: 40px; opacity: 1; }
+      80% { bottom: 40px; opacity: 1; }
+      100% { bottom: -100px; opacity: 0; }
+    }
+
+    /* Additional modern elements */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      box-shadow: var(--box-shadow);
+    }
+
+    .light-mode .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .accent-text {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    .highlight-text {
+      color: var(--highlight);
+      font-weight: 600;
+    }
+
+    .gradient-text {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .secondary-gradient-text {
+      background: var(--secondary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .accent-btn {
+      background: var(--accent-gradient);
+      color: white;
+      padding: 12px 24px;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(128, 92, 242, 0.3);
+    }
+
+    .accent-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(128, 92, 242, 0.4);
+    }
+
+    .secondary-btn {
+      background: var(--secondary-gradient);
+      color: white;
+      padding: 12px 24px;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(255, 169, 77, 0.3);
+    }
+
+    .secondary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 169, 77, 0.4);
+    }
+
+    .outline-btn {
+      background: transparent;
+      color: var(--text-color);
+      padding: 12px 24px;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      border: 1px solid var(--accent-color);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .outline-btn:hover {
+      background: rgba(128, 92, 242, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(128, 92, 242, 0.1);
+      color: var(--accent-color);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .light-mode .badge {
+      background: rgba(128, 92, 242, 0.15);
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent-color), transparent);
+      margin: 40px 0;
+      opacity: 0.2;
+  </style>
+</head>
+<body>
+<header class="custom-header">
+  <div class="header-left">
+    <h1 class="logo">PerfectFitAI</h1>
+  </div>
+
+</header>
+
+<section class="hero">
+  <h1>Get in touch with us</h1>
+  <p>
+    Each design decision is guided by a deep appreciation for and understanding of
+    the integral architectural, artistic, cultural, civic, environmental, and economic
+    forces that shape a project.
+  </p>
+</section>
+
+<section class="form-container">
+  <form method="post" action="#">
+    <div>
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" placeholder="Your Name" required />
+    </div>
+
+    <div>
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="example@mail.com" required />
+    </div>
+
+    <div>
+      <label for="phone">Phone</label>
+      <input type="tel" id="phone" name="phone" placeholder="Phone Number" />
+    </div>
+
+    <div>
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" name="subject" placeholder="Subject" />
+    </div>
+
+    <div style="grid-column: span 2;">
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="4" placeholder="Write your message..."></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn">Submit</button>
+  </form>
+</section>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="flash-msg">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<script>
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light-mode');
+    }
+  });
+</script>
+</body>
+</html>

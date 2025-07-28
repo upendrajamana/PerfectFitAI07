@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Project Ideas</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --box-bg: #f0f0f0;
+      --input-bg: #e0e0e0;
+      --ai-bubble: #d6eaff;
+      --user-bubble: #d1ffd1;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --box-bg: #1e1e1e;
+      --input-bg: #2a2a2a;
+      --ai-bubble: #2c4d68;
+      --user-bubble: #355835;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    .suggestion-box {
+      background-color: var(--box-bg);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      margin: 40px auto;
+    }
+
+    .chat-output {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-output p {
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      max-width: 90%;
+    }
+
+    .user-msg {
+      background-color: var(--user-bubble);
+      align-self: flex-end;
+    }
+
+    .ai-msg {
+      background-color: var(--ai-bubble);
+      align-self: flex-start;
+    }
+
+    .chat-form {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-form input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+    }
+
+    .chat-form button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .chat-form button:hover {
+      background-color: #1e7e34;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+      color: var(--text-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="suggestion-box">
+    <h2>💡 AI Project Ideas</h2>
+    <div class="chat-output" id="chat-output"></div>
+
+    <form class="chat-form" id="chat-form">
+      <input type="text" id="user-input" placeholder="Ask for a project idea (e.g. 'AI + web dev')" required />
+      <button type="submit">Ask</button>
+    </form>
+
+    <div id="loading">Thinking...</div>
+  </div>
+
+  <script>
+    // Load saved theme from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+
+    const chatForm = document.getElementById("chat-form");
+    const chatOutput = document.getElementById("chat-output");
+    const userInput = document.getElementById("user-input");
+    const loading = document.getElementById("loading");
+
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = userInput.value.trim();
+      if (!question) return;
+
+      // Show user message
+      chatOutput.innerHTML += `<p class="user-msg"><b>You:</b> ${question}</p>`;
+      userInput.value = "";
+
+      // Show loading
+      loading.style.display = "block";
+
+      try {
+        const res = await fetch("/ask_project_idea", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+
+        const data = await res.json();
+        loading.style.display = "none";
+        chatOutput.innerHTML += `<p class="ai-msg"><b>AI:</b> ${data.answer}</p>`;
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+
+      } catch (err) {
+        loading.style.display = "none";
+        chatOutput.innerHTML += `<p class="ai-msg">❗ Error: Failed to get response.</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ATS Resume Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: radial-gradient(ellipse at bottom, #0d1117 0%, #010409 100%);
+      --text-color: #e6edf3;
+      --text-secondary: #8b949e;
+      --panel-bg: rgba(22, 27, 34, 0.3);
+      --score-bg: rgba(22, 27, 34, 0.4);
+      --option-bg: rgba(30, 35, 42, 0.5);
+      --detail-bg: rgba(13, 17, 23, 0.6);
+      --highlight: #00d4ff;
+      --accent: #ff6b35;
+      --neon-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+      --border-glow: rgba(0, 212, 255, 0.2);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+    }
+
+    .light-mode {
+      --bg-color: radial-gradient(ellipse at top, #f0f4f8 0%, #d6e8f5 100%);
+      --text-color: #1a202c;
+      --text-secondary: #4a5568;
+      --panel-bg: rgba(255, 255, 255, 0.25);
+      --score-bg: rgba(255, 255, 255, 0.35);
+      --option-bg: rgba(237, 242, 247, 0.4);
+      --detail-bg: rgba(255, 255, 255, 0.3);
+      --highlight: #0066cc;
+      --accent: #e53e3e;
+      --neon-glow: 0 0 20px rgba(0, 102, 204, 0.2);
+      --border-glow: rgba(0, 102, 204, 0.15);
+      --glass-border: rgba(0, 0, 0, 0.1);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      height: 100vh;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(138, 43, 226, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .left {
+      width: 40%;
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-right: 1px solid var(--border-glow);
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: var(--glass-shadow);
+      position: relative;
+    }
+
+    .left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent 0%, var(--highlight) 50%, transparent 100%);
+      opacity: 0.3;
+    }
+
+    .right {
+      width: 60%;
+      padding: 40px;
+      overflow-y: auto;
+      background: transparent;
+      scrollbar-width: thin;
+      scrollbar-color: var(--highlight) transparent;
+    }
+
+    .right::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .right::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .right::-webkit-scrollbar-thumb {
+      background: var(--highlight);
+      border-radius: 3px;
+      box-shadow: var(--neon-glow);
+    }
+
+    .score-card {
+      background: var(--score-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      padding: 35px;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 380px;
+      color: var(--text-color);
+      box-shadow: var(--glass-shadow), var(--neon-glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--highlight) 50%, transparent 100%);
+      opacity: 0.6;
+    }
+
+    .score-card h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 15px;
+      text-align: center;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    .score-main {
+      font-family: 'Orbitron', monospace;
+      font-size: 56px;
+      font-weight: 800;
+      color: var(--highlight);
+      text-align: center;
+      text-shadow: var(--neon-glow);
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .score-main::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--highlight) 50%, transparent 100%);
+      border-radius: 1px;
+    }
+
+    .out-of {
+      font-size: 28px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .issues {
+      color: var(--text-secondary);
+      margin: 10px 0 25px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .score-container {
+      margin-top: 25px;
+    }
+
+    .score-section {
+      margin-bottom: 16px;
+    }
+
+    .score-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--option-bg);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      padding: 16px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      border-radius: 12px;
+      color: var(--text-color);
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.5px;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .score-item:hover {
+      background: rgba(0, 212, 255, 0.1);
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+    }
+
+    .score-badge {
+      background: linear-gradient(135deg, var(--highlight), rgba(0, 212, 255, 0.8));
+      color: #000;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 12px;
+      position: relative;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .score-badge::after {
+      content: '▲';
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--highlight);
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      text-shadow: var(--neon-glow);
+    }
+
+    .score-item.active .score-badge::after {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    .options-list {
+      display: none;
+      background: var(--option-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 0 12px 12px;
+      padding: 16px 20px;
+      margin-top: 4px;
+      color: var(--text-color);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: slideDown 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .options-list div {
+      padding: 6px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+    }
+
+    .options-list div:hover {
+      color: var(--highlight);
+    }
+
+    .options-list.show {
+      display: block;
+    }
+
+    .unlock-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--highlight), rgba(0, 212, 255, 0.8));
+      border: none;
+      border-radius: 12px;
+      color: #000;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 25px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .unlock-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(0, 212, 255, 0.4);
+    }
+
+    .home-btn {
+      display: inline-block;
+      text-align: center;
+      margin-top: 20px;
+      color: var(--highlight);
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+      text-shadow: var(--neon-glow);
+    }
+
+    .home-btn:hover {
+      text-decoration: none;
+      color: var(--accent);
+      transform: translateX(-5px);
+    }
+
+    .tailored-insights-box {
+      background: var(--detail-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 30px;
+      margin-top: 40px;
+      color: var(--text-color);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: var(--glass-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tailored-insights-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+      opacity: 0.6;
+    }
+
+    .tailored-insights-box:hover {
+      border-color: var(--border-glow);
+      box-shadow: var(--glass-shadow), 0 0 30px rgba(0, 212, 255, 0.1);
+    }
+
+    .tailored-insights-box h2 {
+      margin-top: 0;
+      font-family: 'Orbitron', monospace;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--accent);
+      text-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .tailored-insights-box p {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .description-input {
+      width: 100%;
+      height: 140px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--panel-bg);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      color: var(--text-color);
+      padding: 16px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      margin-bottom: 20px;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .description-input:focus {
+      outline: none;
+      border-color: var(--border-glow);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1), var(--neon-glow);
+    }
+
+    .description-input::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .analyze-btn {
+      background: linear-gradient(135deg, var(--accent), rgba(255, 107, 53, 0.8));
+      color: #fff;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .analyze-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.9), var(--accent));
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 30px;
+      right: 40px;
+      background: var(--highlight);
+      color: #000;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 1000;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+    }
+
+    /* Pulse animation for interactive elements */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    .score-main {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Floating particles effect */
+    .left::after {
+      content: '';
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--highlight);
+      border-radius: 50%;
+      top: 20%;
+      left: 20%;
+      opacity: 0.6;
+      animation: float 4s ease-in-out infinite;
+      box-shadow: var(--neon-glow);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+
+  <!-- Left section: Score -->
+  <div class="left">
+    <div class="score-card">
+      <h2>Neural Score Analysis</h2>
+      <div class="score-main">
+        <span id="score-count">0</span><span class="out-of">/100</span>
+      </div>
+
+      <div class="score-container">
+        <div class="score-section">
+          <div class="score-item" onclick="toggleOptions(this)">
+            <span>Tailoring</span>
+            <span class="score-badge" id="match-score">0</span>
+          </div>
+          <div class="options-list">
+            <div>Job Fit Analysis</div>
+            <div>Relevance Mapping</div>
+          </div>
+        </div>
+
+        <div class="score-section">
+          <div class="score-item" onclick="toggleOptions(this)">
+            <span>Content</span>
+            <span class="score-badge" id="analysis-score">0</span>
+          </div>
+          <div class="options-list">
+            <div>Skills Summary</div>
+            <div>Strengths/Gaps</div>
+          </div>
+        </div>
+
+        <div class="score-section">
+          <div class="score-item" onclick="toggleOptions(this)">
+            <span>Section Order</span>
+            <span class="score-badge" id="order-score">0</span>
+          </div>
+          <div class="options-list">
+            <div>Ideal Flow</div>
+            <div>Key Sections</div>
+          </div>
+        </div>
+
+        <div class="score-section">
+          <div class="score-item" onclick="toggleOptions(this)">
+            <span>Section Presence</span>
+            <span class="score-badge" id="presence-score">0</span>
+          </div>
+          <div class="options-list">
+            <div>Important Sections</div>
+            <div>Completeness</div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin: 25px 0; border: none; height: 1px; background: linear-gradient(90deg, transparent 0%, var(--glass-border) 50%, transparent 100%);">
+      <a href="/" class="home-btn">← Back to Home</a>
+    </div>
+  </div>
+
+  <!-- Right section: AI Feedback -->
+  <div class="right">
+    <div class="tailored-insights-box">
+      <h2>AI-Powered Insights</h2>
+      <p>Upload your job description to receive advanced neural analysis of how well your resume is optimized for ATS systems and human reviewers.</p>
+      <textarea id="descriptionInput" placeholder="Paste job description here..." class="description-input"></textarea>
+      <button class="analyze-btn" onclick="submitDescription()">Initialize Analysis</button>
+    </div>
+    <div style="margin-top: 40px; white-space: pre-line; color: var(--text-color); font-family: 'Inter', sans-serif; line-height: 1.7;">
+      {{ analysis }}
+    </div>
+  </div>
+
+  <script>
+    function toggleOptions(item) {
+      item.classList.toggle('active');
+      const next = item.nextElementSibling;
+      if (next && next.classList.contains('options-list')) {
+        next.classList.toggle('show');
+      }
+    }
+
+    async function submitDescription() {
+      const text = document.getElementById("descriptionInput").value.trim();
+
+      if (!text) {
+        alert("Please enter a job description.");
+        return;
+      }
+
+      try {
+        const response = await fetch("/analyze-description", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description: text })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "Something went wrong.");
+        }
+
+        // Show AI feedback
+        alert(result.message);
+        document.getElementById("descriptionInput").value = "";
+      } catch (error) {
+        alert("Error: " + error.message);
+        console.error(error);
+      }
+    }
+
+    function animateScore(id, finalValue, suffix = "%") {
+      const el = document.getElementById(id);
+      let count = 0;
+      const interval = setInterval(() => {
+        if (count >= finalValue) {
+          clearInterval(interval);
+          el.textContent = finalValue + suffix;
+        } else {
+          el.textContent = count + suffix;
+          count++;
+        }
+      }, 20);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      animateScore("score-count", {{ total_score | default(0) }}, "");
+      animateScore("match-score", {{ match_score | default(0) }});
+      animateScore("analysis-score", {{ analysis_score | default(0) }});
+      animateScore("order-score", {{ (resume_order * 10) | default(0) }});
+      animateScore("presence-score", {{ score | default(0) }});
+
+      if (localStorage.getItem("theme") === "light") {
+        document.body.classList.add("light-mode");
+      }
+    });
+
+    function toggleTheme() {
+      document.body.classList.toggle("light-mode");
+      const mode = document.body.classList.contains("light-mode") ? "light" : "dark";
+      localStorage.setItem("theme", mode);
+    }
+  </script>
+</body>
+</html>

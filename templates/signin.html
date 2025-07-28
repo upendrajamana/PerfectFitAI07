@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Authentication Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration - You need to get these values from Firebase Console
+        // Go to: Firebase Console → Project Settings → General → Your apps → Web app
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaujN3ETK6FjDjnb6VlivmRXrHGb6dl4M", // Get from Firebase Console
+            authDomain: "resume-analyzer-6b6d4.firebaseapp.com",
+            projectId: "resume-analyzer-6b6d4",
+            storageBucket: "resume-analyzer-6b6d4.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID_HERE", // Get from Firebase Console
+            appId: "1:288443233510:web:2e9db80b155304c113b727" // Get from Firebase Console
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase functions available globally
+        window.firebaseDB = db;
+        window.addDoc = addDoc;
+        window.collection = collection;
+        window.serverTimestamp = serverTimestamp;
+    </script>
+    <style>
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+
+        .dashboard-section {
+            display: block;
+        }
+        .dashboard-section.hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+
+    <!-- Signup Page -->
+    <div id="signup-page" class="page">
+        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8">
+                <div class="text-center">
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Create your account</h2>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Already have an account?
+                        <button onclick="showPage('login')" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+                            Sign in here
+                        </button>
+                    </p>
+                </div>
+                <form class="mt-8 space-y-6" onsubmit="handleSignup(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="signup-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input id="signup-name" name="name" type="text" required
+                                   class="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all"
+                                   placeholder="Enter your full name">
+                        </div>
+                        <div>
+                            <label for="signup-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                            <input id="signup-email" name="email" type="email" required
+                                   class="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all"
+                                   placeholder="Enter your email address">
+                        </div>
+                        <div>
+                            <label for="signup-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input id="signup-password" name="password" type="password" required
+                                   class="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all"
+                                   placeholder="Create a secure password">
+                        </div>
+                    </div>
+
+                    <div id="signup-message" class="hidden p-4 rounded-lg"></div>
+
+                    <div>
+                        <button type="submit"
+                                class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login-page" class="page active">
+        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8">
+                <div class="text-center">
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Don't have an account?
+                        <button onclick="showPage('signup')" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+                            Create one here
+                        </button>
+                    </p>
+                </div>
+                <form class="mt-8 space-y-6" onsubmit="handleLogin(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                            <input id="login-email" name="email" type="email" required
+                                   class="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all"
+                                   placeholder="Enter your email address">
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input id="login-password" name="password" type="password" required
+                                   class="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-all"
+                                   placeholder="Enter your password">
+                        </div>
+                    </div>
+
+                    <div id="login-message" class="hidden p-4 rounded-lg"></div>
+
+                    <div>
+                        <button type="submit"
+                                class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="home-page" class="page">
+        <div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+            <!-- Navigation -->
+            <nav class="bg-white shadow-sm border-b">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex items-center">
+                            <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span id="user-name" class="text-gray-700 font-medium"></span>
+                            <button onclick="handleLogout()"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-extrabold text-gray-900 mb-4">
+                        Welcome back, <span id="welcome-name" class="text-indigo-600"></span>! 🎉
+                    </h2>
+                    <p class="text-xl text-gray-600">You have successfully logged into your account.</p>
+                </div>
+
+                <!-- Dashboard Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <button onclick="showDashboardSection('profile')" class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all transform hover:scale-105 text-left">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Profile</h3>
+                                <p class="text-gray-600">Manage your account</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button onclick="showDashboardSection('analytics')" class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all transform hover:scale-105 text-left">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Analytics</h3>
+                                <p class="text-gray-600">View your stats</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button onclick="showDashboardSection('settings')" class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all transform hover:scale-105 text-left">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Settings</h3>
+                                <p class="text-gray-600">Configure preferences</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Dashboard Content Sections -->
+                <div id="dashboard-overview" class="dashboard-section">
+                    <!-- Session Info -->
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Session Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-600">Email:</p>
+                                <p id="session-email" class="font-medium text-gray-900"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Login Time:</p>
+                                <p id="session-time" class="font-medium text-gray-900"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="dashboard-profile" class="dashboard-section hidden">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 mb-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">Profile Settings</h3>
+                            <button onclick="showDashboardSection('overview')" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                ← Back to Dashboard
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Profile Info -->
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h4>
+                                <form onsubmit="updateProfile(event)" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                        <input id="profile-name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                        <input id="profile-email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                        <input id="profile-phone" type="tel" placeholder="Enter your phone number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                        <textarea id="profile-bio" rows="3" placeholder="Tell us about yourself..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                    </div>
+                                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
+                                        Update Profile
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Account Stats -->
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Account Statistics</h4>
+                                <div class="space-y-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <div class="flex items-center">
+                                            <div class="p-2 bg-blue-100 rounded-full">
+                                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm text-gray-600">Member Since</p>
+                                                <p id="member-since" class="font-semibold text-gray-900"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-green-50 p-4 rounded-lg">
+                                        <div class="flex items-center">
+                                            <div class="p-2 bg-green-100 rounded-full">
+                                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm text-gray-600">Account Status</p>
+                                                <p class="font-semibold text-green-600">Active</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-purple-50 p-4 rounded-lg">
+                                        <div class="flex items-center">
+                                            <div class="p-2 bg-purple-100 rounded-full">
+                                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm text-gray-600">Login Count</p>
+                                                <p id="login-count" class="font-semibold text-gray-900">1</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="dashboard-analytics" class="dashboard-section hidden">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">Analytics Dashboard</h3>
+                            <button onclick="showDashboardSection('overview')" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                ← Back to Dashboard
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-lg text-white">
+                                <div class="flex items-center">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    <div class="ml-4">
+                                        <p class="text-blue-100">Page Views</p>
+                                        <p class="text-2xl font-bold">1,234</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-lg text-white">
+                                <div class="flex items-center">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div class="ml-4">
+                                        <p class="text-green-100">Session Time</p>
+                                        <p class="text-2xl font-bold">24m</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-lg text-white">
+                                <div class="flex items-center">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                    <div class="ml-4">
+                                        <p class="text-purple-100">Growth</p>
+                                        <p class="text-2xl font-bold">+12%</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-lg text-white">
+                                <div class="flex items-center">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <div class="ml-4">
+                                        <p class="text-orange-100">Activities</p>
+                                        <p class="text-2xl font-bold">89</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center p-3 bg-white rounded-lg">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                    <span class="text-gray-700">Logged in successfully</span>
+                                    <span class="ml-auto text-sm text-gray-500">Just now</span>
+                                </div>
+                                <div class="flex items-center p-3 bg-white rounded-lg">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                                    <span class="text-gray-700">Profile viewed</span>
+                                    <span class="ml-auto text-sm text-gray-500">2 min ago</span>
+                                </div>
+                                <div class="flex items-center p-3 bg-white rounded-lg">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                                    <span class="text-gray-700">Settings updated</span>
+                                    <span class="ml-auto text-sm text-gray-500">1 hour ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="dashboard-settings" class="dashboard-section hidden">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">Settings</h3>
+                            <button onclick="showDashboardSection('overview')" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                ← Back to Dashboard
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Notification Settings -->
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Email Notifications</p>
+                                            <p class="text-sm text-gray-600">Receive updates via email</p>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer" checked>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        </label>
+                                    </div>
+
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Push Notifications</p>
+                                            <p class="text-sm text-gray-600">Get notified on your device</p>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        </label>
+                                    </div>
+
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Marketing Updates</p>
+                                            <p class="text-sm text-gray-600">Receive promotional content</p>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer" checked>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Security Settings -->
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Security & Privacy</h4>
+                                <div class="space-y-4">
+                                    <button onclick="changePassword()" class="w-full text-left p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Change Password</p>
+                                                <p class="text-sm text-gray-600">Update your account password</p>
+                                            </div>
+                                        </div>
+                                    </button>
+
+                                    <button onclick="downloadData()" class="w-full text-left p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Download Data</p>
+                                                <p class="text-sm text-gray-600">Export your account information</p>
+                                            </div>
+                                        </div>
+                                    </button>
+
+                                    <button onclick="deleteAccount()" class="w-full text-left p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            <div>
+                                                <p class="font-medium text-red-900">Delete Account</p>
+                                                <p class="text-sm text-red-600">Permanently remove your account</p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated user storage (in real app, this would be handled by Flask sessions)
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('users')) || []; // Load from localStorage
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show selected page
+            document.getElementById(pageId + '-page').classList.add('active');
+        }
+
+        function showMessage(elementId, message, type = 'success') {
+            const messageEl = document.getElementById(elementId);
+            messageEl.className = `p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            messageEl.textContent = message;
+            messageEl.classList.remove('hidden');
+
+            setTimeout(() => {
+                messageEl.classList.add('hidden');
+            }, 3000);
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            // Check if user already exists in local storage
+            if (users.find(user => user.email === email)) {
+                showMessage('signup-message', 'An account with this email already exists!', 'error');
+                return;
+            }
+
+            try {
+                // Simulate password hashing (in real app, this would be done securely on backend)
+                const hashedPassword = btoa(password); // Simple base64 encoding for demo
+
+                // Add user to local simulated database
+                const newUser = {
+                    name: name,
+                    email: email,
+                    password: hashedPassword,
+                    createdAt: new Date().toISOString()
+                };
+                users.push(newUser);
+
+                // Save to localStorage so users persist after refresh
+                localStorage.setItem('users', JSON.stringify(users));
+
+                // Store user data in Firestore
+                const userDoc = {
+                    name: name,
+                    email: email,
+                    signupTimestamp: window.serverTimestamp(),
+                    createdAt: new Date().toISOString()
+                };
+
+                await window.addDoc(window.collection(window.firebaseDB, 'users'), userDoc);
+
+                showMessage('signup-message', 'Account created successfully and saved to database! You can now sign in.');
+
+                // Clear form
+                document.getElementById('signup-name').value = '';
+                document.getElementById('signup-email').value = '';
+                document.getElementById('signup-password').value = '';
+
+                // Auto-switch to login after 2 seconds
+                setTimeout(() => {
+                    showPage('login');
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error saving to Firestore:', error);
+                showMessage('signup-message', 'Account created locally but could not save to database. Please check your connection.', 'error');
+
+                // Still allow local functionality
+                setTimeout(() => {
+                    showPage('login');
+                }, 2000);
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Find user
+            const user = users.find(u => u.email === email);
+
+            if (!user) {
+                showMessage('login-message', 'No account found with this email address.', 'error');
+                return;
+            }
+
+            // Check password (in real app, this would compare hashed passwords)
+            // For demo purposes, we'll decode the stored password and compare directly
+            const storedPassword = atob(user.password);
+            if (storedPassword !== password) {
+                showMessage('login-message', 'Incorrect password. Please try again.', 'error');
+                return;
+            }
+
+            // Set current user (simulates Flask session)
+            currentUser = {
+                name: user.name,
+                email: user.email,
+                loginTime: new Date().toLocaleString()
+            };
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
+            // Update home page with user info
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('welcome-name').textContent = currentUser.name;
+            document.getElementById('session-email').textContent = currentUser.email;
+            document.getElementById('session-time').textContent = currentUser.loginTime;
+
+            showMessage('login-message', 'Login successful! Redirecting...');
+
+            // Clear form
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+
+            // Redirect to home
+                    setTimeout(() => {
+            window.location.href = '/'; // or '/dashboard' if that’s your route
+        }, 1500);
+        }
+
+        // Replace the existing handleLogout function
+function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+
+    // Show login page
+    showPage('login');
+
+    // Clear forms
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+
+    // Clear URL hash
+    if (window.location.hash) {
+        history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+
+    // Show logout message
+    setTimeout(() => {
+        showMessage('login-message', 'You have been logged out successfully.');
+    }, 100);
+}
+
+        // Dashboard section navigation
+        function showDashboardSection(sectionId) {
+            // Hide all dashboard sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Show selected section
+            document.getElementById('dashboard-' + sectionId).classList.remove('hidden');
+
+            // Load profile data when profile section is shown
+            if (sectionId === 'profile' && currentUser) {
+                loadProfileData();
+            }
+        }
+
+        function loadProfileData() {
+            if (!currentUser) return;
+
+            // Load current user data into profile form
+            document.getElementById('profile-name').value = currentUser.name || '';
+            document.getElementById('profile-email').value = currentUser.email || '';
+
+            // Load additional profile data from localStorage if exists
+            const profileData = JSON.parse(localStorage.getItem('profileData_' + currentUser.email)) || {};
+            document.getElementById('profile-phone').value = profileData.phone || '';
+            document.getElementById('profile-bio').value = profileData.bio || '';
+
+            // Set member since date
+            const user = users.find(u => u.email === currentUser.email);
+            if (user && user.createdAt) {
+                const memberSince = new Date(user.createdAt).toLocaleDateString();
+                document.getElementById('member-since').textContent = memberSince;
+            }
+        }
+
+        function updateProfile(event) {
+            event.preventDefault();
+
+            if (!currentUser) return;
+
+            const profileData = {
+                phone: document.getElementById('profile-phone').value,
+                bio: document.getElementById('profile-bio').value,
+                updatedAt: new Date().toISOString()
+            };
+
+            // Save profile data to localStorage
+            localStorage.setItem('profileData_' + currentUser.email, JSON.stringify(profileData));
+
+            // Update current user name if changed
+            const newName = document.getElementById('profile-name').value;
+            if (newName !== currentUser.name) {
+                currentUser.name = newName;
+
+                // Update in users array
+                const userIndex = users.findIndex(u => u.email === currentUser.email);
+                if (userIndex !== -1) {
+                    users[userIndex].name = newName;
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+
+                // Update display
+                document.getElementById('user-name').textContent = newName;
+                document.getElementById('welcome-name').textContent = newName;
+            }
+
+            alert('Profile updated successfully!');
+        }
+
+        function changePassword() {
+            const newPassword = prompt('Enter your new password:');
+            if (newPassword && newPassword.length >= 6) {
+                const userIndex = users.findIndex(u => u.email === currentUser.email);
+                if (userIndex !== -1) {
+                    users[userIndex].password = btoa(newPassword);
+                    localStorage.setItem('users', JSON.stringify(users));
+                    alert('Password changed successfully!');
+                }
+            } else if (newPassword) {
+                alert('Password must be at least 6 characters long.');
+            }
+        }
+
+        function downloadData() {
+            if (!currentUser) return;
+
+            const userData = {
+                name: currentUser.name,
+                email: currentUser.email,
+                loginTime: currentUser.loginTime,
+                profileData: JSON.parse(localStorage.getItem('profileData_' + currentUser.email)) || {}
+            };
+
+            const dataStr = JSON.stringify(userData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'my-account-data.json';
+            link.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        function deleteAccount() {
+            if (!currentUser) return;
+
+            const confirmation = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+            if (confirmation) {
+                const secondConfirmation = confirm('This will permanently delete all your data. Are you absolutely sure?');
+                if (secondConfirmation) {
+                    // Remove user from users array
+                    users = users.filter(u => u.email !== currentUser.email);
+                    localStorage.setItem('users', JSON.stringify(users));
+
+                    // Remove profile data
+                    localStorage.removeItem('profileData_' + currentUser.email);
+
+                    alert('Your account has been deleted.');
+                    handleLogout();
+                }
+            }
+        }
+
+        // Initialize with a demo user for testing (only if no users exist)
+        if (users.length === 0) {
+            users.push({
+                name: 'Demo User',
+                email: 'demo@example.com',
+                password: btoa('password123'), // password123
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+    </script>
+    <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if user should go directly to dashboard
+    const hash = window.location.hash;
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+
+    // Check if user is logged in
+    const currentUser = localStorage.getItem('currentUser');
+
+    if (currentUser && (hash === '#dashboard' || section === 'dashboard')) {
+        // User is logged in and wants dashboard - show home page with dashboard
+        showPage('home');
+        // Optional: show specific dashboard section
+        showDashboardSection('overview');
+    } else if (currentUser) {
+        // User is logged in but no specific section requested - show home page
+        showPage('home');
+        // Update user info
+        const user = JSON.parse(currentUser);
+        document.getElementById('user-name').textContent = user.name;
+        document.getElementById('welcome-name').textContent = user.name;
+        document.getElementById('session-email').textContent = user.email;
+        document.getElementById('session-time').textContent = user.loginTime || new Date().toLocaleString();
+    } else {
+        // User not logged in - show login page
+        showPage('login');
+    }
+});
+
+// Also update the existing handleLogin function in your second page to redirect properly:
+// Replace the existing handleLogin function's redirect section with this:
+
+function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    // Find user
+    const user = users.find(u => u.email === email);
+
+    if (!user) {
+        showMessage('login-message', 'No account found with this email address.', 'error');
+        return;
+    }
+
+    // Check password (in real app, this would compare hashed passwords)
+    const storedPassword = atob(user.password);
+    if (storedPassword !== password) {
+        showMessage('login-message', 'Incorrect password. Please try again.', 'error');
+        return;
+    }
+
+    // Set current user (simulates Flask session)
+    currentUser = {
+        name: user.name,
+        email: user.email,
+        loginTime: new Date().toLocaleString()
+    };
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    // Update home page with user info
+    document.getElementById('user-name').textContent = currentUser.name;
+    document.getElementById('welcome-name').textContent = currentUser.name;
+    document.getElementById('session-email').textContent = currentUser.email;
+    document.getElementById('session-time').textContent = currentUser.loginTime;
+
+    showMessage('login-message', 'Login successful! Redirecting...');
+
+    // Clear form
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+
+    // Check if user came from dashboard link
+    const hash = window.location.hash;
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+
+    if (hash === '#dashboard' || section === 'dashboard') {
+        // Redirect to dashboard after login
+        setTimeout(() => {
+            showPage('home');
+            showDashboardSection('overview');
+        }, 1500);
+    } else {
+        // Regular redirect to home
+        setTimeout(() => {
+            showPage('home');
+        }, 1500);
+    }
+}
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'965372c8f55a914f',t:'MTc1MzUyODIwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Template Gallery - Choose Your Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Effects */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        /* Neon Glow Effects */
+        .neon-border {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            border: 2px solid rgba(59, 130, 246, 0.6);
+        }
+
+        .neon-text {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+            color: #60a5fa;
+        }
+
+        /* Futuristic Buttons */
+        .cyber-btn {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8));
+            border: 1px solid rgba(59, 130, 246, 0.6);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .cyber-btn:hover:before {
+            left: 100%;
+        }
+
+        .cyber-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            border-color: rgba(59, 130, 246, 0.8);
+        }
+
+        .cyber-btn-secondary {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            backdrop-filter: blur(8px);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-btn-secondary:hover {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(148, 163, 184, 0.6);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4);
+        }
+
+        /* Loading Animation */
+        .loading-glow {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #3b82f6);
+            background-size: 200% 200%;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Category Badges */
+        .category-badge {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2));
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            backdrop-filter: blur(8px);
+            color: #60a5fa;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar-glass {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .sidebar-item {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(147, 51, 234, 0.3));
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Responsive Grid */
+        .resume-grid {
+            display: grid;
+            gap: 32px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 768px) {
+            .resume-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .resume-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Header Glow */
+        .header-glow {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+    <div class="flex min-h-screen">
+        <!-- Left Sidebar -->
+        <div class="sidebar-glass hidden lg:block w-80 min-h-screen">
+            <div class="p-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold neon-text mb-2">Template Categories</h2>
+                    <div class="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="sidebar-item active px-6 py-4 rounded-xl cursor-pointer flex items-center gap-3" onclick="filterCategory('all')">
+                        <span class="text-2xl">🌟</span>
+                        <span class="font-medium">All Templates</span>
+                    </div>
+                    <div class="sidebar-item px-6 py-4 rounded-xl cursor-pointer flex items-center gap-3" onclick="filterCategory('modern')">
+                        <span class="text-2xl">✨</span>
+                        <span class="font-medium">Modern</span>
+                    </div>
+                    <div class="sidebar-item px-6 py-4 rounded-xl cursor-pointer flex items-center gap-3" onclick="filterCategory('classic')">
+                        <span class="text-2xl">📋</span>
+                        <span class="font-medium">Classic</span>
+                    </div>
+                    <div class="sidebar-item px-6 py-4 rounded-xl cursor-pointer flex items-center gap-3" onclick="filterCategory('creative')">
+                        <span class="text-2xl">🎨</span>
+                        <span class="font-medium">Creative</span>
+                    </div>
+                    <div class="sidebar-item px-6 py-4 rounded-xl cursor-pointer flex items-center gap-3" onclick="filterCategory('professional')">
+                        <span class="text-2xl">💼</span>
+                        <span class="font-medium">Professional</span>
+                    </div>
+                    <div class="sidebar-item px-6 py-4 rounded-xl cursor-pointer flex items-center gap-3" onclick="filterCategory('minimalist')">
+                        <span class="text-2xl">⚪</span>
+                        <span class="font-medium">Minimalist</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Header -->
+            <div class="header-glow px-8 py-8 sticky top-0 z-10">
+                <div class="max-w-7xl mx-auto">
+                    <h1 class="text-4xl font-bold neon-text mb-3">Professional Resume Templates</h1>
+                    <p class="text-slate-300 text-lg">Choose from our collection of cutting-edge, ATS-friendly resume designs</p>
+                    <div class="mt-4 w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Resume Grid -->
+            <div class="p-8">
+                <div class="max-w-7xl mx-auto">
+                    <div id="resumeGrid" class="resume-grid">
+                        <!-- Resume cards will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PDF.js worker config
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Resume templates metadata
+        const resumeTemplates = [
+            {
+                id: 1,
+                name: "Quantum Modern",
+                category: "modern",
+                description: "Sleek design with glassmorphism effects",
+                structure: "modern-layout",
+                preview: "static/resumes/resume1.pdf"
+            },
+            {
+                id: 2,
+                name: "Executive Classic",
+                category: "classic",
+                description: "Traditional layout with modern touches",
+                structure: "classic-layout",
+                preview: "static/resumes/resume2.pdf"
+            },
+            {
+                id: 3,
+                name: "Creative Vision",
+                category: "creative",
+                description: "Bold design for creative professionals",
+                structure: "creative-layout",
+                preview: "static/resumes/resume3.pdf"
+            },
+            {
+                id: 4,
+                name: "Corporate Pro",
+                category: "professional",
+                description: "Clean, professional corporate design",
+                structure: "professional-layout",
+                preview: "static/resumes/resume4.pdf"
+            },
+            {
+                id: 5,
+                name: "Tech Innovator",
+                category: "modern",
+                description: "Perfect for tech professionals",
+                structure: "tech-layout",
+                preview: "static/resumes/resume5.pdf"
+            },
+            {
+                id: 6,
+                name: "Elegant Minimal",
+                category: "minimalist",
+                description: "Clean, minimal design philosophy",
+                structure: "minimal-layout",
+                preview: "static/resumes/resume6.pdf"
+            },
+            {
+                id: 7,
+                name: "Data Scientist",
+                category: "professional",
+                description: "Optimized for data roles",
+                structure: "data-layout",
+                preview: "static/resumes/resume7.pdf"
+            },
+            {
+                id: 8,
+                name: "Creative Portfolio",
+                category: "creative",
+                description: "Showcase your creative work",
+                structure: "portfolio-layout",
+                preview: "static/resumes/resume8.pdf"
+            },
+            {
+                id: 9,
+                name: "Cyber Clean",
+                category: "modern",
+                description: "Futuristic design with clean lines",
+                structure: "cyber-layout",
+                preview: "static/resumes/resume9.pdf"
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        // Create resume card HTML
+        function createResumeCard(template, index) {
+            const canvasId = `canvas-${template.id}`;
+            return `
+                <div class="glass-card p-6 transform hover:scale-105 transition-all duration-500" data-category="${template.category}">
+                    <!-- Preview Container -->
+                    <div class="canvas-container relative aspect-[3/4] mb-6 overflow-hidden">
+                        <div id="loading-${canvasId}" class="flex items-center justify-center h-full">
+                            <div class="text-center">
+                                <div class="w-12 h-12 loading-glow rounded-full mb-4 mx-auto"></div>
+                                <p class="text-slate-400 text-sm">Loading preview...</p>
+                            </div>
+                        </div>
+                        <canvas id="${canvasId}" class="w-full h-full object-contain" style="display: none;"></canvas>
+
+                        <!-- Hover Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                            <div class="text-white">
+                                <p class="text-sm font-medium">${template.description}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Content -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-slate-100">${template.name}</h3>
+                            <span class="category-badge px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
+                                ${template.category}
+                            </span>
+                        </div>
+
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            ${template.description}
+                        </p>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3 pt-2">
+                            <button onclick="previewTemplate('${template.preview}', '${template.name}')"
+                                    class="cyber-btn-secondary flex-1 px-4 py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2 relative overflow-hidden">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Preview
+                            </button>
+
+                            <button onclick="useTemplate(${template.id}, '${template.structure}')"
+                                    class="cyber-btn flex-1 px-4 py-3 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 relative overflow-hidden">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Use Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render PDF preview
+        async function renderPDF(pdfUrl, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const loadingDiv = document.getElementById(`loading-${canvasId}`);
+
+            try {
+                const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 1.5 });
+
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                await page.render({ canvasContext: ctx, viewport }).promise;
+
+                loadingDiv.style.display = 'none';
+                canvas.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                loadingDiv.innerHTML = `
+                    <div class="text-center p-8">
+                        <div class="text-red-400 mb-2">⚠️</div>
+                        <p class="text-red-400 text-sm">Preview unavailable</p>
+                    </div>`;
+            }
+        }
+
+        // Filter templates by category
+        function filterCategory(category) {
+            currentFilter = category;
+
+            // Update active sidebar item
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.sidebar-item').classList.add('active');
+
+            // Filter cards
+            const cards = document.querySelectorAll('[data-category]');
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.5s ease-in-out';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Preview template in new tab
+        function previewTemplate(pdfUrl, name) {
+            window.open(pdfUrl, '_blank', 'width=800,height=1000');
+        }
+
+        // Use template - redirect to resume.html with template parameters
+        function useTemplate(templateId, structure) {
+    // Find the selected template info
+    const templateInfo = resumeTemplates.find(t => t.id === templateId);
+
+    if (!templateInfo) {
+        alert("Invalid template selected.");
+        return;
+    }
+
+    // Extract file and name from the template
+    const file = templateInfo.preview.split('/').pop();  // Get only filename like "resume1.pdf"
+    const name = templateInfo.name;
+
+    // Store in sessionStorage
+    sessionStorage.setItem('selectedTemplate', JSON.stringify(templateInfo));
+
+    // Redirect with full parameters
+    window.location.href = `/resume?template=${templateId}&structure=${structure}&file=${encodeURIComponent(file)}&name=${encodeURIComponent(name)}`;
+}
+
+
+        // Render all resume cards
+        function renderResumes() {
+            const grid = document.getElementById('resumeGrid');
+            grid.innerHTML = resumeTemplates.map((template, index) => createResumeCard(template, index)).join('');
+
+            // Load PDF previews after a short delay
+            setTimeout(() => {
+                resumeTemplates.forEach(template => {
+                    renderPDF(template.preview, `canvas-${template.id}`);
+                });
+            }, 100);
+        }
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', renderResumes);
+    </script>
+</body>
+</html>
