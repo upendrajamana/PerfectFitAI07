@@ -16,14 +16,16 @@ from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from all_scores import ResumeAnalyzer
 
-cred = credentials.Certificate("fire.json")  # Your JSON filename
+load_dotenv()
+
+firebase_json = os.getenv("FIREBASE_CREDENTIALS")
+with open(firebase_json, 'r') as f:
+    cred_dict = json.load(f)
+cred = credentials.Certificate(cred_dict)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 
-
-
-load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("grop_api_key")
 
