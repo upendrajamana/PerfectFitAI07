@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash, jsonify
 import os
-from resume_scoring import extract_text, score_resume, detect_sections
+from resume_scoring import extract_text, score_resume, detect_sections,calculate_resume_length_score
 from gemini import analyze_resume, format_review,get_ai_suggestion_response
 from gemini import analyze_resume, format_review,get_ai_suggestion_response,get_project_idea_response
 from datetime import datetime
@@ -14,6 +14,7 @@ from firebase_admin import credentials, firestore
 import random
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
+from all_scores import ResumeAnalyzer
 
 cred = credentials.Certificate("fire.json")  # Your JSON filename
 firebase_admin.initialize_app(cred)
@@ -46,7 +47,7 @@ total_score = 0
 presence_score = 0
 resume_order_score = 0
 
-
+analyzer = ResumeAnalyzer()
 
 
 @app.route("/ask_ai", methods=["POST"])
@@ -167,7 +168,7 @@ def uploaded_file(filename):
 def upload_resume():
     global last_resume_text, last_detected_sections, analysis
     global match_score, analysis_score, total_score
-    global presence_score, resume_order_score,grammar_score,job_description
+    global presence_score, resume_order_score,grammar_score,job_description,length_score,results
 
     if 'resume' not in request.files:
         flash('No resume file part')
@@ -189,46 +190,41 @@ def upload_resume():
     # Analyze now
     last_detected_sections = detect_sections(last_resume_text)
     presence_score, resume_order_score, order = score_resume(last_resume_text, last_detected_sections)
+    length_score=calculate_resume_length_score(last_resume_text, True)
+
     result = analyze_resume(last_resume_text, presence_score, resume_order_score, last_user_description, order)
 
     analysis = result.get("analysis", "")
     match_score = result.get("match_score") or 0
     analysis_score = extract_analysis_score(analysis) or 0
     grammar_score = result.get("grammar_score") or 0  # ✅ This is how you fetch grammar score
-    print(grammar_score)
+
     # Final total score
     # Weights when JD is given
-    weights_with_jd = {
-        "presence": 0.05,
-        "order": 0.05,
-        "analysis": 0.70,
-        "match": 0.10,
-        "grammar": 0.10
-    }
+    #all scores#########################################
+
+
+
 
     # Weights when JD is NOT given
     weights_no_jd = {
-        "presence": 0.05,
-        "order": 0.05,
-        "analysis": 0.80,  # Boost content score
-        "grammar": 0.10
+        "presence": 0.15,
+        "order": 0.15,
+        "analysis": 0.60,  # reduced from 0.70
+        "grammar": 0.06,
+        "length": 0.09
     }
+    if analysis_score < 10:
+        grammar_score=0   # or use another function if needed
 
-    if last_user_description.strip():  # JD is given
-        total_score = (
-                presence_score * weights_with_jd["presence"] +
-                resume_order_score * weights_with_jd["order"] +
-                analysis_score * weights_with_jd["analysis"] +
-                match_score * weights_with_jd["match"] +
-                grammar_score * weights_with_jd["grammar"]
-        )
-    else:  # JD not given, exclude match_score
-        total_score = (
-                presence_score * weights_no_jd["presence"] +
-                resume_order_score * weights_no_jd["order"] +
-                analysis_score * weights_no_jd["analysis"] +
-                grammar_score * weights_no_jd["grammar"]
-        )
+
+    total_score = (
+            presence_score * weights_no_jd["presence"] +
+            resume_order_score * weights_no_jd["order"] +
+            analysis_score * weights_no_jd["analysis"] +
+            grammar_score * weights_no_jd["grammar"]+
+            length_score * weights_no_jd["length"]
+    )
 
     total_score = round(min(total_score, 100), 2)
     # Cap at 100 and round
@@ -240,20 +236,56 @@ def upload_resume():
 
     return redirect(url_for('home'))
 
+
 @app.route('/score')
 def show_score():
+    results = analyzer.analyze_resume(last_resume_text)
     return render_template('new.html',
+                           # Existing scores
                            match_score=match_score,
                            analysis_score=analysis_score,
                            resume_order=resume_order_score,
                            presence_score=presence_score,
                            total_score=total_score,
-                           analysis=analysis)
+                           analysis=analysis,
+
+                           # Add feedback for existing sections (you'll need to provide these)
+                           match_feedback="Job tailoring analysis feedback here",
+                           analysis_feedback="Content quality analysis feedback here",
+                           order_feedback="Resume format analysis feedback here",
+                           presence_feedback="Section presence analysis feedback here",
+
+                           # New scores from results
+                           quantify_score=results['quantify_impact']['score'],
+                           quantify_feedback=results['quantify_impact']['feedback'],
+
+                           unnecessary_score=results['unnecessary_sections']['score'],
+                           unnecessary_feedback=results['unnecessary_sections']['feedback'],
+
+                           contact_score=results['contact_details']['score'],
+                           contact_feedback=results['contact_details']['feedback'],
+
+                           dates_score=results['date_consistency']['score'],
+                           dates_feedback=results['date_consistency']['feedback'],
+
+                           keywords_score=results['keywords']['score'],
+                           keywords_feedback=results['keywords']['feedback'],
+
+                           verbs_score=results['action_verbs']['score'],
+                           verbs_feedback=results['action_verbs']['feedback'],
+
+                           achievements_score=results['achievements']['score'],
+                           achievements_feedback=results['achievements']['feedback'],
+
+                           grammar_score=results['grammar']['score'],
+                           grammar_feedback=results['grammar']['feedback']
+                           )
 
 @app.route('/feature/1')
 def ats_checker():
     if not last_resume_text:
         return redirect(url_for('home'))
+
 
     return render_template(
         "ats.html",
@@ -262,7 +294,9 @@ def ats_checker():
         resume_order=resume_order_score,
         match_score=match_score,
         analysis_score=analysis_score,
-        total_score=total_score
+        total_score=total_score,
+
+
     )
 
 
@@ -357,7 +391,6 @@ def popular_resumes():
             ]
 
     return render_template('popular_resumes.html', resumes=resumes)
-
 
 @app.route('/resume')
 def use_template():

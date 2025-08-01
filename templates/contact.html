@@ -46,6 +46,8 @@
                         radial-gradient(circle at 90% 80%, rgba(255, 169, 77, 0.05) 0%, rgba(0, 0, 0, 0) 80%);
       background-attachment: fixed;
       line-height: 1.6;
+      height: 100vh;
+      overflow: hidden;
     }
 
     .light-mode body {
@@ -57,11 +59,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 32px 5%;
+      padding: 16px 5%;
       background-color: var(--bg-color);
-      position: sticky;
-      top: 0;
-      z-index: 100;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -75,7 +74,7 @@
     .logo {
       color: var(--text-color);
       font-family: 'Playfair Display', serif;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       letter-spacing: -0.5px;
       background: var(--accent-gradient);
@@ -83,6 +82,7 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
       position: relative;
+      margin: 0;
     }
 
     .logo::after {
@@ -168,21 +168,26 @@
       height: 16px;
     }
 
+    .main-container {
+      display: flex;
+      height: calc(100vh - 80px);
+      gap: 40px;
+      padding: 20px 5%;
+      align-items: center;
+    }
+
     .hero {
-      text-align: center;
-      padding: 100px 40px 60px;
-      max-width: 900px;
-      margin: auto;
+      flex: 1;
+      max-width: 500px;
       position: relative;
     }
 
     .hero::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px;
+      top: -10px;
+      left: 0;
+      width: 60px;
       height: 4px;
       background: var(--secondary-gradient);
       border-radius: 2px;
@@ -190,10 +195,10 @@
 
     .hero h1 {
       font-family: 'Playfair Display', serif;
-      font-size: 56px;
+      font-size: 42px;
       font-weight: 700;
       line-height: 1.2;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       background: linear-gradient(135deg, var(--text-color) 30%, var(--accent-color));
       -webkit-background-clip: text;
       background-clip: text;
@@ -202,26 +207,24 @@
     }
 
     .hero p {
-      margin-top: 24px;
+      margin-top: 16px;
       color: var(--text-color);
       opacity: 0.7;
-      font-size: 18px;
-      line-height: 1.8;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
+      font-size: 16px;
+      line-height: 1.6;
     }
 
     .form-container {
-      max-width: 800px;
-      margin: 60px auto;
-      padding: 40px;
+      flex: 1;
+      max-width: 600px;
       background-color: var(--form-bg);
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
       position: relative;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      height: fit-content;
     }
 
     .light-mode .form-container {
@@ -241,18 +244,18 @@
     form {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 40px;
-      row-gap: 24px;
+      column-gap: 20px;
+      row-gap: 16px;
     }
 
     form div {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     label {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--text-color);
       opacity: 0.8;
@@ -260,14 +263,15 @@
 
     input, textarea {
       width: 100%;
-      padding: 14px 16px;
+      padding: 10px 12px;
       background-color: var(--input-bg);
       color: var(--text-color);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--border-radius);
-      font-size: 15px;
+      font-size: 14px;
       transition: var(--transition);
       font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
     }
 
     .light-mode input, .light-mode textarea {
@@ -283,20 +287,20 @@
     textarea {
       grid-column: span 2;
       resize: vertical;
-      min-height: 120px;
+      min-height: 80px;
     }
 
     .submit-btn {
       grid-column: span 2;
-      margin-top: 12px;
-      padding: 16px;
+      margin-top: 8px;
+      padding: 12px 16px;
       background: var(--accent-gradient);
       border: none;
       color: white;
       font-weight: 600;
       border-radius: var(--border-radius);
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
       transition: var(--transition);
       box-shadow: 0 4px 12px rgba(128, 92, 242, 0.3);
       position: relative;
@@ -326,11 +330,35 @@
       opacity: 1;
     }
 
+    @media (max-width: 1024px) {
+      .main-container {
+        flex-direction: column;
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+        gap: 20px;
+        padding: 10px 5%;
+      }
+
+      .hero {
+        text-align: center;
+        max-width: 100%;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .form-container {
+        max-width: 100%;
+        width: 100%;
+      }
+    }
+
     @media (max-width: 768px) {
       .custom-header {
         flex-direction: column;
-        gap: 20px;
-        padding: 20px 5%;
+        gap: 15px;
+        padding: 15px 5%;
       }
 
       .nav-container {
@@ -348,11 +376,11 @@
       }
 
       .hero h1 {
-        font-size: 36px;
+        font-size: 28px;
       }
 
       .hero p {
-        font-size: 16px;
+        font-size: 14px;
       }
 
       form {
@@ -364,7 +392,7 @@
       }
 
       .form-container {
-        padding: 30px 20px;
+        padding: 20px;
       }
     }
 
@@ -374,7 +402,7 @@
       left: 50%;
       transform: translateX(-50%);
       background-color: var(--flash-bg);
-      color: #00ff99;
+      color: ##0000FF;
       padding: 16px 28px;
       border-left: 6px solid var(--flash-border);
       border-radius: var(--border-radius);
@@ -509,6 +537,7 @@
       background: linear-gradient(to right, transparent, var(--accent-color), transparent);
       margin: 40px 0;
       opacity: 0.2;
+    }
   </style>
 </head>
 <body>
@@ -516,48 +545,49 @@
   <div class="header-left">
     <h1 class="logo">PerfectFitAI</h1>
   </div>
-
 </header>
 
-<section class="hero">
-  <h1>Get in touch with us</h1>
-  <p>
-    Each design decision is guided by a deep appreciation for and understanding of
-    the integral architectural, artistic, cultural, civic, environmental, and economic
-    forces that shape a project.
-  </p>
-</section>
+<div class="main-container">
+  <section class="hero">
+    <h1>Get in touch with us</h1>
+    <p>
+      Each design decision is guided by a deep appreciation for and understanding of
+      the integral architectural, artistic, cultural, civic, environmental, and economic
+      forces that shape a project.
+    </p>
+  </section>
 
-<section class="form-container">
-  <form method="post" action="#">
-    <div>
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" placeholder="Your Name" required />
-    </div>
+  <section class="form-container">
+    <form method="post" action="#">
+      <div>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Your Name" required />
+      </div>
 
-    <div>
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="example@mail.com" required />
-    </div>
+      <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="example@mail.com" required />
+      </div>
 
-    <div>
-      <label for="phone">Phone</label>
-      <input type="tel" id="phone" name="phone" placeholder="Phone Number" />
-    </div>
+      <div>
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" placeholder="Phone Number" />
+      </div>
 
-    <div>
-      <label for="subject">Subject</label>
-      <input type="text" id="subject" name="subject" placeholder="Subject" />
-    </div>
+      <div>
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" placeholder="Subject" />
+      </div>
 
-    <div style="grid-column: span 2;">
-      <label for="message">Message</label>
-      <textarea id="message" name="message" rows="4" placeholder="Write your message..."></textarea>
-    </div>
+      <div style="grid-column: span 2;">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="4" placeholder="Write your message..."></textarea>
+      </div>
 
-    <button type="submit" class="submit-btn">Submit</button>
-  </form>
-</section>
+      <button type="submit" class="submit-btn">Submit</button>
+    </form>
+  </section>
+</div>
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}
