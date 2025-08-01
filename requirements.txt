@@ -7,3 +7,6 @@ google-generativeai==0.4.0
 openai>=1.3.7
 python-dotenv>=1.0.1
 gunicorn
+spacy
+python-dateutil
+language_tool_python
