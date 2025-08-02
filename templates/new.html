@@ -86,6 +86,17 @@
             color: white;
         }
 
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
         /* Main Layout */
         .main-container {
             display: grid;
@@ -104,6 +115,48 @@
             border-right: 1px solid var(--border-light);
             padding: 2rem 0;
             overflow-y: auto;
+        }
+
+        /* Mobile Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+        }
+
+        .mobile-sidebar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 280px;
+            height: 100%;
+            background: var(--bg-sidebar);
+            z-index: 300;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            padding: 0.5rem;
         }
 
         .score-section {
@@ -422,6 +475,18 @@
                 display: none;
             }
 
+            .mobile-sidebar {
+                display: block;
+            }
+
+            .sidebar-overlay {
+                display: block;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
             .right-panel {
                 border-left: none;
                 border-top: 1px solid var(--border-light);
@@ -437,6 +502,40 @@
             .right-panel {
                 padding: 1rem;
             }
+
+            .mobile-sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .score-section {
+                padding: 0 1.5rem;
+            }
+
+            .section-title {
+                padding: 0 1.5rem;
+            }
+
+            .fix-item {
+                padding: 0.75rem 1.5rem;
+            }
+
+            .analysis-content {
+                padding: 1.5rem;
+            }
+
+            .panel-title {
+                font-size: 1.5rem;
+            }
+
+            .score-number {
+                font-size: 3rem;
+            }
+        }
+
+        /* Show overlay when sidebar is open */
+        .sidebar-overlay.show {
+            display: block;
         }
     </style>
 </head>
@@ -445,11 +544,157 @@
     <div class="header">
         <div class="nav-container">
             <a href="/" class="logo">PerfectFitAI</a>
+            <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
         </div>
     </div>
 
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+    <!-- Mobile Sidebar -->
+    <div class="mobile-sidebar" id="mobileSidebar">
+        <button class="sidebar-close" onclick="closeMobileSidebar()">×</button>
+
+        <div class="score-section">
+            <div class="overall-score">
+                <div class="score-circle">
+                    <span class="score-number" id="mobile-score-count">0</span>
+                </div>
+                <div class="score-label">Overall</div>
+                <div class="points-badge">
+                    <span>↗</span>
+                    <span id="mobile-points-gained">0 Points</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Top Fixes</div>
+        <ul class="fixes-list">
+            <li class="fix-item active" data-section="tailoring" onclick="showSectionMobile('tailoring')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">🎯</div>
+                    <div class="fix-name">Job Tailoring</div>
+                </div>
+                <div class="fix-score low" id="mobile-match-score">0</div>
+            </li>
+            <li class="fix-item" data-section="content" onclick="showSectionMobile('content')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">📝</div>
+                    <div class="fix-name">Content Quality</div>
+                </div>
+                <div class="fix-score low" id="mobile-analysis-score">0</div>
+            </li>
+            <li class="fix-item" data-section="format" onclick="showSectionMobile('format')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">📋</div>
+                    <div class="fix-name">Resume Format</div>
+                </div>
+                <div class="fix-score low" id="mobile-order-score">0</div>
+            </li>
+            <li class="fix-item" data-section="sections" onclick="showSectionMobile('sections')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">📄</div>
+                    <div class="fix-name">Section Presence</div>
+                </div>
+                <div class="fix-score low" id="mobile-presence-score">0</div>
+            </li>
+            <li class="fix-item" data-section="quantify" onclick="showSectionMobile('quantify')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">📊</div>
+                    <div class="fix-name">Quantify Impact</div>
+                </div>
+                <div class="fix-score low" id="mobile-quantify-score">0</div>
+            </li>
+            <li class="fix-item" data-section="length" onclick="showSectionMobile('length')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">📏</div>
+                    <div class="fix-name">Resume Length</div>
+                </div>
+                <div class="fix-score low" id="mobile-length-score">0</div>
+            </li>
+            <li class="fix-item" data-section="unnecessary" onclick="showSectionMobile('unnecessary')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">🗑️</div>
+                    <div class="fix-name">Unnecessary Sections</div>
+                </div>
+                <div class="fix-score low" id="mobile-unnecessary-score">0</div>
+            </li>
+            <li class="fix-item" data-section="contact" onclick="showSectionMobile('contact')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">📞</div>
+                    <div class="fix-name">Contact Details</div>
+                </div>
+                <div class="fix-score low" id="mobile-contact-score">0</div>
+            </li>
+            <li class="fix-item" data-section="dates" onclick="showSectionMobile('dates')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">📅</div>
+                    <div class="fix-name">Date Consistency</div>
+                </div>
+                <div class="fix-score low" id="mobile-dates-score">0</div>
+            </li>
+            <li class="fix-item" data-section="gaps" onclick="showSectionMobile('gaps')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">⏳</div>
+                    <div class="fix-name">Experience Gaps</div>
+                </div>
+                <div class="fix-score low" id="mobile-gaps-score">0</div>
+            </li>
+        </ul>
+
+        <div class="section-title" style="margin-top: 2rem;">🎯 Keyword & Role Match</div>
+        <ul class="fixes-list">
+            <li class="fix-item" data-section="keywords" onclick="showSectionMobile('keywords')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">🔍</div>
+                    <div class="fix-name">Missing Keywords</div>
+                </div>
+                <div class="fix-score low" id="mobile-keywords-score">0</div>
+            </li>
+            <li class="fix-item" data-section="skills" onclick="showSectionMobile('skills')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">⚙️</div>
+                    <div class="fix-name">Technical Skills</div>
+                </div>
+                <div class="fix-score low" id="mobile-skills-score">0</div>
+            </li>
+        </ul>
+
+        <div class="section-title" style="margin-top: 2rem;">📢 Writing & Clarity</div>
+        <ul class="fixes-list">
+            <li class="fix-item" data-section="verbs" onclick="showSectionMobile('verbs')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">🚀</div>
+                    <div class="fix-name">Action Verbs</div>
+                </div>
+                <div class="fix-score low" id="mobile-verbs-score">0</div>
+            </li>
+            <li class="fix-item" data-section="achievements" onclick="showSectionMobile('achievements')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">🏆</div>
+                    <div class="fix-name">Achievements vs Tasks</div>
+                </div>
+                <div class="fix-score low" id="mobile-achievements-score">0</div>
+            </li>
+            <li class="fix-item" data-section="softskills" onclick="showSectionMobile('softskills')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">💭</div>
+                    <div class="fix-name">Soft Skills Balance</div>
+                </div>
+                <div class="fix-score low" id="mobile-softskills-score">0</div>
+            </li>
+            <li class="fix-item" data-section="grammar" onclick="showSectionMobile('grammar')">
+                <div class="fix-item-content">
+                    <div class="fix-icon">✏️</div>
+                    <div class="fix-name">Grammar & Style</div>
+                </div>
+                <div class="fix-score low" id="mobile-grammar-score">0</div>
+            </li>
+        </ul>
+    </div>
+
     <div class="main-container">
-        <!-- Left Sidebar -->
+        <!-- Left Sidebar (Desktop) -->
         <div class="left-sidebar">
             <div class="score-section">
                 <div class="overall-score">
@@ -873,6 +1118,39 @@
             }
         };
 
+        // Mobile sidebar functions
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.add('open');
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // Mobile section selection (closes sidebar after selection)
+        function showSectionMobile(sectionKey) {
+            showSection(sectionKey);
+
+            // Update mobile sidebar active state
+            document.querySelectorAll('#mobileSidebar .fix-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`#mobileSidebar [data-section="${sectionKey}"]`).classList.add('active');
+
+            // Close mobile sidebar
+            closeMobileSidebar();
+        }
+
         function toggleOptions(element) {
             const optionsList = element.querySelector('.options-list');
             const isExpanded = optionsList.classList.contains('expanded');
@@ -941,19 +1219,32 @@
                 total += score;
                 count++;
 
-                // Update score number in sidebar
+                // Update score number in desktop sidebar
                 const scoreElement = document.getElementById(id);
                 if (scoreElement) {
                     scoreElement.textContent = score;
                     // Update score class
                     scoreElement.className = 'fix-score ' + getScoreClass(score);
                 }
+
+                // Update score number in mobile sidebar
+                const mobileScoreElement = document.getElementById('mobile-' + id);
+                if (mobileScoreElement) {
+                    mobileScoreElement.textContent = score;
+                    mobileScoreElement.className = 'fix-score ' + getScoreClass(score);
+                }
             }
 
             // Use the total_score from backend if available, otherwise calculate average
             const totalScore = {{ total_score|default(0)|int }} || (count > 0 ? Math.round(total / count) : 0);
+
+            // Update desktop scores
             document.getElementById('score-count').textContent = totalScore;
             document.getElementById('points-gained').textContent = totalScore + ' Points';
+
+            // Update mobile scores
+            document.getElementById('mobile-score-count').textContent = totalScore;
+            document.getElementById('mobile-points-gained').textContent = totalScore + ' Points';
 
             // Refresh current section display
             const activeSection = document.querySelector('.fix-item.active');
@@ -963,11 +1254,14 @@
         }
 
         function showSection(sectionKey) {
-            // Update active state
-            document.querySelectorAll('.fix-item').forEach(item => {
+            // Update active state in desktop sidebar
+            document.querySelectorAll('.left-sidebar .fix-item').forEach(item => {
                 item.classList.remove('active');
             });
-            document.querySelector(`[data-section="${sectionKey}"]`).classList.add('active');
+            const desktopItem = document.querySelector(`.left-sidebar [data-section="${sectionKey}"]`);
+            if (desktopItem) {
+                desktopItem.classList.add('active');
+            }
 
             // Get section data
             const section = sectionData[sectionKey];
@@ -1005,6 +1299,25 @@
             showSection('tailoring');
             // Run initial update to load the scores
             updateScores();
+        });
+
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('mobileSidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+
+            if (sidebar.classList.contains('open') &&
+                !sidebar.contains(event.target) &&
+                !menuBtn.contains(event.target)) {
+                closeMobileSidebar();
+            }
+        });
+
+        // Handle escape key to close mobile sidebar
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeMobileSidebar();
+            }
         });
     </script>
 </body>
