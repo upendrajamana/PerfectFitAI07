@@ -2,9 +2,9 @@ import json
 
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash, jsonify
 import os
-from resume_scoring import extract_text, score_resume, detect_sections,calculate_resume_length_score
-from gemini import analyze_resume, format_review,get_ai_suggestion_response
-from gemini import analyze_resume, format_review,get_ai_suggestion_response,get_project_idea_response
+from resume_scoring import extract_text, score_resume, detect_sections, calculate_resume_length_score
+from gemini import analyze_resume, format_review, get_ai_suggestion_response
+from gemini import analyze_resume, format_review, get_ai_suggestion_response, get_project_idea_response
 from datetime import datetime
 import re
 from flask import session
@@ -25,7 +25,6 @@ cred = credentials.Certificate(cred_dict)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-
 app = Flask(__name__)
 app.secret_key = os.getenv("grop_api_key")
 
@@ -38,17 +37,7 @@ SAVE_FOLDER = os.path.join(BASE_DIR, 'descriptions')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
-# Global state
-last_resume_text = ""
-last_detected_sections = []
-last_user_description = ""
-analysis = ""
-match_score = 0
-analysis_score = 0
-total_score = 0
-presence_score = 0
-resume_order_score = 0
-
+# Remove global variables - now using session
 analyzer = ResumeAnalyzer()
 
 
@@ -62,6 +51,7 @@ def ask_ai():
 
     answer = get_ai_suggestion_response(question)
     return jsonify({"answer": answer})
+
 
 @app.route("/ask_project_idea", methods=["POST"])
 def ask_project_idea():
@@ -91,22 +81,30 @@ def extract_analysis_score(analysis_text):
 
 def calculate_total_score(presence_score, order_score, analysis_score, match_score=None):
     if match_score is not None:
-        return round((presence_score / 100) * 25 + (order_score / 100) * 20 + (analysis_score / 100) * 25 + (match_score / 100) * 30, 2)
+        return round((presence_score / 100) * 25 + (order_score / 100) * 20 + (analysis_score / 100) * 25 + (
+                    match_score / 100) * 30, 2)
     else:
         return round((presence_score / 100) * 35 + (order_score / 100) * 30 + (analysis_score / 100) * 35, 2)
 
-grammar_score=0
+
 @app.route('/')
 def home():
+    # Get values from session with defaults
+    uploaded = bool(session.get('last_resume_text', ''))
+    total_score = session.get('total_score', 0)
+    analysis_score = session.get('analysis_score', 0)
+    resume_order_score = session.get('resume_order_score', 0)
+    grammar_score = session.get('grammar_score', 0)
+    presence_score = session.get('presence_score', 0)
+
     return render_template(
         'index.html',
-        uploaded=bool(last_resume_text),
+        uploaded=uploaded,
         total_score=total_score,
-        analysis_score=analysis_score,             # CONTENT SCORE
-        resume_order_score=resume_order_score,     # SECTION ORDER
-        grammar_score=grammar_score,               # GRAMMAR
+        analysis_score=analysis_score,  # CONTENT SCORE
+        resume_order_score=resume_order_score,  # SECTION ORDER
+        grammar_score=grammar_score,  # GRAMMAR
         presence_score=presence_score  # SECTION PRESENCE
-
     )
 
 
@@ -150,7 +148,6 @@ def dashboard():
         return redirect(url_for('signin'))
 
 
-
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -168,10 +165,6 @@ def uploaded_file(filename):
 
 @app.route('/upload', methods=['POST'])
 def upload_resume():
-    global last_resume_text, last_detected_sections, analysis
-    global match_score, analysis_score, total_score
-    global presence_score, resume_order_score,grammar_score,job_description,length_score,results
-
     if 'resume' not in request.files:
         flash('No resume file part')
         return redirect(url_for('home'))
@@ -186,64 +179,79 @@ def upload_resume():
     filepath = os.path.join(UPLOAD_FOLDER, filename)
 
     file.save(filepath)
-    last_resume_text = extract_text(filepath, ext)
+
+    # Store resume text in session
+    session['last_resume_text'] = extract_text(filepath, ext)
     flash('Resume successfully uploaded.')
 
     # Analyze now
-    last_detected_sections = detect_sections(last_resume_text)
-    presence_score, resume_order_score, order = score_resume(last_resume_text, last_detected_sections)
-    length_score=calculate_resume_length_score(last_resume_text, True)
+    last_detected_sections = detect_sections(session['last_resume_text'])
+    session['last_detected_sections'] = last_detected_sections
 
-    result = analyze_resume(last_resume_text, presence_score, resume_order_score, last_user_description, order)
+    presence_score, resume_order_score, order = score_resume(session['last_resume_text'], last_detected_sections)
+    length_score = calculate_resume_length_score(session['last_resume_text'], True)
 
-    analysis = result.get("analysis", "")
-    match_score = result.get("match_score") or 0
-    analysis_score = extract_analysis_score(analysis) or 0
-    grammar_score = result.get("grammar_score") or 0  # ✅ This is how you fetch grammar score
+    # Get user description from session if exists
+    last_user_description = session.get('last_user_description', '')
 
-    # Final total score
-    # Weights when JD is given
-    #all scores#########################################
+    result = analyze_resume(session['last_resume_text'], presence_score, resume_order_score, last_user_description,
+                            order)
 
+    # Store all results in session
+    session['analysis'] = result.get("analysis", "")
+    session['match_score'] = result.get("match_score") or 0
+    session['analysis_score'] = extract_analysis_score(session['analysis']) or 0
+    session['grammar_score'] = result.get("grammar_score") or 0
+    session['presence_score'] = presence_score
+    session['resume_order_score'] = resume_order_score
 
-
-
-    # Weights when JD is NOT given
+    # Final total score calculation
     weights_no_jd = {
         "presence": 0.15,
         "order": 0.15,
-        "analysis": 0.60,  # reduced from 0.70
+        "analysis": 0.60,
         "grammar": 0.06,
         "length": 0.09
     }
-    if analysis_score < 10:
-        grammar_score=0   # or use another function if needed
 
+    if session['analysis_score'] < 10:
+        session['grammar_score'] = 0
 
     total_score = (
-            presence_score * weights_no_jd["presence"] +
-            resume_order_score * weights_no_jd["order"] +
-            analysis_score * weights_no_jd["analysis"] +
-            grammar_score * weights_no_jd["grammar"]+
+            session['presence_score'] * weights_no_jd["presence"] +
+            session['resume_order_score'] * weights_no_jd["order"] +
+            session['analysis_score'] * weights_no_jd["analysis"] +
+            session['grammar_score'] * weights_no_jd["grammar"] +
             length_score * weights_no_jd["length"]
     )
 
-    total_score = round(min(total_score, 100), 2)
-    # Cap at 100 and round
-    # Cap at 100
-
-    # Store scores in session
-    session['grammar_score'] = grammar_score
-    session['total_score'] = total_score
+    session['total_score'] = round(min(total_score, 100), 2)
 
     return redirect(url_for('home'))
 
 
 @app.route('/score')
 def show_score():
+    # Safely get resume text from session
+    last_resume_text = session.get('last_resume_text', '')
+    if not last_resume_text:
+        flash('Please upload a resume first')
+        return redirect(url_for('home'))
+
+    # Safely get all scores from session with defaults
+    match_score = session.get('match_score', 0)
+    analysis_score = session.get('analysis_score', 0)
+    resume_order_score = session.get('resume_order_score', 0)
+    presence_score = session.get('presence_score', 0)
+    total_score = session.get('total_score', 0)
+    analysis = session.get('analysis', '')
+    grammar_score = session.get('grammar_score', 0)
+
+    # Run analyzer on current resume
     results = analyzer.analyze_resume(last_resume_text)
+
     return render_template('new.html',
-                           # Existing scores
+                           # Existing scores from session
                            match_score=match_score,
                            analysis_score=analysis_score,
                            resume_order=resume_order_score,
@@ -283,11 +291,20 @@ def show_score():
                            grammar_feedback=results['grammar']['feedback']
                            )
 
+
 @app.route('/feature/1')
 def ats_checker():
-    if not last_resume_text:
+    # Check if resume exists in session
+    if not session.get('last_resume_text'):
         return redirect(url_for('home'))
 
+    # Safely get scores from session
+    presence_score = session.get('presence_score', 0)
+    analysis = session.get('analysis', '')
+    resume_order_score = session.get('resume_order_score', 0)
+    match_score = session.get('match_score', 0)
+    analysis_score = session.get('analysis_score', 0)
+    total_score = session.get('total_score', 0)
 
     return render_template(
         "ats.html",
@@ -297,8 +314,6 @@ def ats_checker():
         match_score=match_score,
         analysis_score=analysis_score,
         total_score=total_score,
-
-
     )
 
 
@@ -327,6 +342,7 @@ def signin():
             flash('User not found. Please sign up.')
 
     return render_template("signin.html")
+
 
 from flask import Flask, render_template, request, redirect
 from firebase_admin import firestore
@@ -365,19 +381,23 @@ def signup():
 
 @app.route('/feature/2')
 def format_feedback():
-    if not last_resume_text:
+    if not session.get('last_resume_text'):
         return redirect(url_for('home'))
 
-    format_analysis = format_review(last_resume_text)
+    format_analysis = format_review(session['last_resume_text'])
     return render_template("format_feedback.html", analysis=format_analysis)
+
 
 @app.route("/feature/4")
 def feature_4():
     return render_template("suggestions.html")
 
+
 @app.route("/feature/5")
 def feature_5():
     return render_template("projects.html")
+
+
 @app.route('/popular-resumes', methods=['GET', 'POST'])
 def popular_resumes():
     resumes = []
@@ -394,6 +414,7 @@ def popular_resumes():
 
     return render_template('popular_resumes.html', resumes=resumes)
 
+
 @app.route('/resume')
 def use_template():
     file = request.args.get('file')
@@ -409,7 +430,7 @@ def use_template():
 
     # Dummy resume list just as example
     resumes = [
-        { 'name': 'Modern Resume', 'file': 'resume1.pdf', 'url': 'static/resumes/resume1.png' },
+        {'name': 'Modern Resume', 'file': 'resume1.pdf', 'url': 'static/resumes/resume1.png'},
         ...
     ]
 
@@ -442,8 +463,12 @@ def analyze_description():
         return jsonify({'message': 'Empty description'}), 400
 
     try:
+        # Store description in session for later use
+        session['last_user_description'] = description
+
         # Directly get AI suggestion/feedback
-        ai_response = get_ai_suggestion_response(f"Here is a job description:\n\n{description}\n\nPlease analyze this for resume tailoring.")
+        ai_response = get_ai_suggestion_response(
+            f"Here is a job description:\n\n{description}\n\nPlease analyze this for resume tailoring.")
         return jsonify({'message': ai_response}), 200
     except Exception as e:
         return jsonify({'message': f"AI Error: {str(e)}"}), 500
@@ -451,7 +476,7 @@ def analyze_description():
 
 @app.route('/feature/<int:feature_id>')
 def feature_info(feature_id):
-    if not last_resume_text:
+    if not session.get('last_resume_text'):
         return redirect(url_for('home'))
 
     feature_map = {
@@ -465,6 +490,7 @@ def feature_info(feature_id):
         8: "Transparency"
     }
     selected_feature = feature_map.get(feature_id, "Unknown Feature")
+    analysis = session.get('analysis', '')
 
     return render_template("feature.html", feature=selected_feature, analysis=analysis)
 
